@@ -1,0 +1,2 @@
+# Styrketrening
+Logging av styrketrening
