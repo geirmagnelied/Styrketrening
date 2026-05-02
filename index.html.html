@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LØFT">
+<title>LØFT</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #090910;
+    --surface: #0f0f1c;
+    --surface2: #141428;
+    --border: #1c1c2e;
+    --text: #e2ddd6;
+    --muted: #4a4a6a;
+    --accent: #c9f542;
+    --accent-dim: #8aac1a;
+    --red: #f54242;
+    --blue: #42b8f5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', 'Courier New', monospace; overflow-x: hidden; }
+  body { padding-bottom: 5rem; }
+
+  /* Header */
+  header { padding: 3rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; background: var(--bg); position: sticky; top: 0; z-index: 50; }
+  .logo-label { font-size: 0.52rem; letter-spacing: 0.3em; color: var(--muted); margin-bottom: 0.1rem; }
+  .logo { font-family: 'DM Serif Display', Georgia, serif; font-size: 1.9rem; letter-spacing: -0.04em; line-height: 1; }
+  .header-right { text-align: right; }
+  .session-count { font-size: 0.5rem; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 0.3rem; }
+  .drive-btn { font-family: inherit; font-size: 0.5rem; letter-spacing: 0.16em; background: none; border: 1px solid var(--border); border-radius: 3px; color: var(--muted); padding: 0.28rem 0.6rem; cursor: pointer; }
+
+  /* Nav */
+  nav { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 5rem; z-index: 49; overflow-x: auto; }
+  nav::-webkit-scrollbar { display: none; }
+  .nav-btn { flex: 1; min-width: 3.8rem; padding: 0.65rem 0.2rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: inherit; font-size: 0.48rem; letter-spacing: 0.16em; cursor: pointer; transition: color 0.15s; white-space: nowrap; }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Main */
+  main { padding: 1.1rem; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Toast */
+  #toast { position: fixed; top: 0.75rem; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--bg); padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.65rem; font-weight: 500; letter-spacing: 0.12em; z-index: 999; display: none; white-space: nowrap; box-shadow: 0 4px 24px rgba(0,0,0,0.6); }
+
+  /* Labels */
+  .sm-label { font-size: 0.5rem; color: var(--muted); letter-spacing: 0.14em; margin-bottom: 0.22rem; }
+  .section-label { font-size: 0.52rem; color: var(--muted); letter-spacing: 0.2em; margin-bottom: 0.4rem; }
+
+  /* Inputs */
+  input, select, textarea {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 3px;
+    color: var(--text); font-family: inherit; font-size: 0.82rem;
+    padding: 0.38rem 0.55rem; width: 100%; outline: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a4a6a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
+  textarea { resize: none; }
+
+  /* Buttons */
+  .btn-ghost { background: none; border: 1px solid var(--border); border-radius: 3px; color: var(--muted); font-family: inherit; font-size: 0.58rem; letter-spacing: 0.16em; padding: 0.35rem 0.7rem; cursor: pointer; }
+  .btn-primary { background: var(--accent); border: none; border-radius: 3px; color: var(--bg); font-family: inherit; font-size: 0.65rem; letter-spacing: 0.22em; padding: 0.85rem 1rem; font-weight: 700; width: 100%; cursor: pointer; }
+  .btn-danger { background: none; border: 1px solid var(--red); border-radius: 3px; color: var(--red); font-family: inherit; font-size: 0.52rem; letter-spacing: 0.14em; padding: 0.25rem 0.55rem; cursor: pointer; }
+  .btn-accent-outline { background: none; border: 1px solid var(--accent); border-radius: 3px; color: var(--accent); font-family: inherit; font-size: 0.55rem; letter-spacing: 0.16em; padding: 0.35rem 0.7rem; cursor: pointer; white-space: nowrap; }
+  .btn-add-dashed { width: 100%; padding: 0.6rem; background: none; border: 1px dashed var(--border); border-radius: 4px; color: var(--muted); font-size: 0.58rem; letter-spacing: 0.2em; cursor: pointer; font-family: inherit; margin-bottom: 0.8rem; }
+
+  /* Section box */
+  .section-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem; margin-bottom: 1rem; }
+
+  /* Exercise card */
+  .ex-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.8rem; overflow: hidden; }
+  .ex-card-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); background: #0d0d1a; }
+  .ex-num { font-size: 0.5rem; color: var(--muted); min-width: 1.1rem; }
+  .ex-card-head select { flex: 1; border: none; background: none; padding: 0; color: var(--text); font-size: 0.82rem; background-image: none; }
+  .ex-card-body { padding: 0.6rem 0.8rem; }
+  .set-grid-head { display: grid; grid-template-columns: 1.4rem 1fr 1fr 2.8rem 1.6rem; gap: 0.3rem; margin-bottom: 0.35rem; }
+  .set-grid-head span { font-size: 0.46rem; color: var(--muted); letter-spacing: 0.1em; }
+  .set-row { display: grid; grid-template-columns: 1.4rem 1fr 1fr 2.8rem 1.6rem; gap: 0.3rem; margin-bottom: 0.28rem; align-items: center; }
+  .set-num { font-size: 0.54rem; color: var(--muted); }
+  .set-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 0; line-height: 1; }
+  .set-footer { display: flex; gap: 0.5rem; margin-top: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .rest-after-row { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+  .rest-after-row span { font-size: 0.48rem; color: var(--muted); white-space: nowrap; }
+  .rest-after-row input { width: 3.5rem; }
+
+  /* Default rest row */
+  .def-rest-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .def-rest-row span { font-size: 0.54rem; color: var(--muted); letter-spacing: 0.14em; white-space: nowrap; }
+  .def-rest-row input { width: 5rem; }
+
+  /* Date label */
+  .date-label { font-size: 0.56rem; color: var(--muted); letter-spacing: 0.2em; margin-bottom: 1rem; }
+
+  /* History cards */
+  .hist-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.6rem; overflow: hidden; }
+  .hist-head { padding: 0.8rem 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .hist-date { font-size: 0.52rem; color: var(--muted); letter-spacing: 0.14em; margin-bottom: 0.12rem; }
+  .hist-exnames { font-size: 0.76rem; }
+  .hist-vol { font-size: 0.52rem; color: var(--accent); margin-top: 0.1rem; letter-spacing: 0.1em; }
+  .hist-toggle { font-size: 0.6rem; color: var(--muted); }
+  .hist-body { border-top: 1px solid var(--border); padding: 0.7rem 1rem; display: none; }
+  .hist-body.open { display: block; }
+  .hist-ex-name { font-size: 0.56rem; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 0.22rem; }
+  .hist-set-row { font-size: 0.68rem; color: var(--muted); display: flex; gap: 0.9rem; margin-bottom: 0.1rem; }
+  .hist-warmup { font-size: 0.66rem; color: var(--muted); margin-bottom: 0.6rem; }
+  .hist-note { font-size: 0.64rem; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 0.4rem; margin-top: 0.2rem; }
+
+  /* Empty state */
+  .empty { text-align: center; color: var(--muted); padding: 3.5rem 0; font-size: 0.66rem; letter-spacing: 0.15em; }
+
+  /* Progress */
+  .chart-wrap { position: relative; height: 160px; margin-bottom: 1.5rem; }
+
+  /* Template cards */
+  .tpl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.7rem; overflow: hidden; }
+  .tpl-head { padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .tpl-name { font-size: 0.82rem; }
+  .tpl-sub { font-size: 0.52rem; color: var(--muted); margin-top: 0.1rem; }
+  .tpl-actions { display: flex; gap: 0.4rem; }
+  .tpl-body { border-top: 1px solid var(--border); padding: 0.65rem 1rem; display: none; }
+  .tpl-body.open { display: block; }
+  .tpl-ex-row { font-size: 0.72rem; color: var(--muted); padding: 0.2rem 0; display: flex; align-items: center; gap: 0.5rem; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; justify-content: center; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 12px 12px 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.5rem 1.25rem 2.5rem; }
+  .modal-title { font-size: 0.85rem; letter-spacing: 0.1em; margin-bottom: 1rem; }
+  .modal-close { position: absolute; right: 1.25rem; font-size: 1.2rem; background: none; border: none; color: var(--muted); cursor: pointer; }
+
+  /* Exercise library list */
+  .lib-list { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .lib-row { display: flex; justify-content: space-between; align-items: center; padding: 0.52rem 0.8rem; font-size: 0.74rem; }
+  .lib-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .lib-row:nth-child(even) { background: var(--bg); }
+  .lib-tag { font-size: 0.44rem; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* Template editor */
+  .tpl-editor { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 0.8rem; margin-bottom: 0.8rem; }
+  .tpl-ex-editor { display: flex; gap: 0.4rem; margin-bottom: 0.35rem; align-items: center; }
+  .tpl-ex-editor select { flex: 1; }
+  .tpl-sets-input { width: 3.2rem; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <div>
+    <div class="logo-label">TRENINGSDAGBOK</div>
+    <div class="logo">LØFT</div>
+  </div>
+  <div class="header-right">
+    <div class="session-count" id="sessionCount">0 ØKTER</div>
+    <button class="drive-btn" id="driveSyncBtn" onclick="syncFromDrive()">↓ DRIVE</button>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="setView('log')">LOG</button>
+  <button class="nav-btn" onclick="setView('templates')">MALAR</button>
+  <button class="nav-btn" onclick="setView('history')">HISTORIKK</button>
+  <button class="nav-btn" onclick="setView('progress')">PROGRESJON</button>
+  <button class="nav-btn" onclick="setView('exercises')">ØVINGAR</button>
+</nav>
+
+<main>
+
+  <!-- ══ LOG VIEW ══════════════════════════════════════════════════════════ -->
+  <div id="view-log" class="view active">
+    <div class="date-label" id="logDate"></div>
+
+    <!-- Warmup -->
+    <div class="section-label">OPPVARMING</div>
+    <div class="section-box">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">
+        <div>
+          <div class="sm-label">Type</div>
+          <select id="warmupType">
+            <option value="">—</option>
+            <option>Løping</option><option>Sykling</option><option>Roing</option>
+            <option>Gåing</option><option>Ellipse</option><option>Hopping</option>
+            <option>Dynamisk tøying</option><option>Anna</option>
+          </select>
+        </div>
+        <div>
+          <div class="sm-label">Tid (min)</div>
+          <input type="number" id="warmupMin" placeholder="0" inputmode="decimal">
+        </div>
+        <div>
+          <div class="sm-label">Km</div>
+          <input type="number" id="warmupKm" placeholder="0.0" inputmode="decimal">
+        </div>
+      </div>
+    </div>
+
+    <!-- Default rest -->
+    <div class="def-rest-row">
+      <span>STD PAUSE (sek)</span>
+      <input type="number" id="defaultRest" placeholder="60" inputmode="numeric">
+    </div>
+
+    <!-- Exercises -->
+    <div id="exerciseList"></div>
+    <button class="btn-add-dashed" onclick="addExercise()">+ LEGG TIL ØVING</button>
+
+    <textarea id="sessionNote" placeholder="Notat (valgfritt)..." rows="2" style="margin-bottom:0.9rem"></textarea>
+    <button class="btn-primary" onclick="saveSession()">LAGRE ØKT → GOOGLE DRIVE</button>
+  </div>
+
+  <!-- ══ TEMPLATES VIEW ════════════════════════════════════════════════════ -->
+  <div id="view-templates" class="view">
+    <div class="date-label">ØKTMALAR</div>
+    <button class="btn-ghost" onclick="openNewTemplateModal()" style="margin-bottom:1rem;width:100%">+ LAG NY MAL</button>
+    <div id="templateList"></div>
+  </div>
+
+  <!-- ══ HISTORY VIEW ══════════════════════════════════════════════════════ -->
+  <div id="view-history" class="view">
+    <div class="date-label">TRENINGSHISTORIKK</div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- ══ PROGRESS VIEW ════════════════════════════════════════════════════ -->
+  <div id="view-progress" class="view">
+    <div class="sm-label">Vel øving</div>
+    <select id="progressExSelect" onchange="renderProgressCharts()" style="margin-bottom:1.2rem"></select>
+    <div class="section-label">MAKS VEKT (KG)</div>
+    <div class="chart-wrap"><canvas id="chartWeight"></canvas></div>
+    <div class="section-label">TOTAL VOLUM (KG × REPS)</div>
+    <div class="chart-wrap"><canvas id="chartVolume"></canvas></div>
+  </div>
+
+  <!-- ══ EXERCISES VIEW ════════════════════════════════════════════════════ -->
+  <div id="view-exercises" class="view">
+    <div class="date-label">ØVINGSBIBLIOTEK</div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem">
+      <input type="text" id="newExInput" placeholder="Ny øving..." onkeydown="if(event.key==='Enter')addToLib()">
+      <button class="btn-accent-outline" onclick="addToLib()">+ LEGG TIL</button>
+    </div>
+    <div class="lib-list" id="exerciseLibList"></div>
+  </div>
+
+</main>
+
+<!-- ══ NEW TEMPLATE MODAL ═════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="templateModal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeTemplateModal()">×</button>
+    <div class="modal-title" id="templateModalTitle">NY ØKTMAL</div>
+    <div class="sm-label">Namn på malen</div>
+    <input type="text" id="tplNameInput" placeholder="t.d. Push A" style="margin-bottom:0.9rem">
+    <div class="sm-label" style="margin-bottom:0.4rem">ØVINGAR I MALEN</div>
+    <div id="tplExList"></div>
+    <button class="btn-ghost" onclick="addTplEx()" style="width:100%;margin-bottom:1rem">+ LEGG TIL ØVING I MAL</button>
+    <button class="btn-primary" onclick="saveTemplate()">LAGRE MAL</button>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const DEFAULT_EXERCISES = [
+  "Benkpress","Knebøy","Markløft","Skulderpress","Pull-ups",
+  "Roing","Bicep curl","Triceps pushdown","Lunges","Leg press",
+  "Lateral raise","Face pull","Hip thrust","Romanian deadlift",
+  "Dips","Hammer curl","Incline benkpress","Cable row","Lat pulldown","Planke"
+];
+
+const DEFAULT_TEMPLATES = [
+  { id: 't1', name: 'Push A', exercises: [
+    { name: 'Benkpress', sets: 4 }, { name: 'Skulderpress', sets: 3 },
+    { name: 'Incline benkpress', sets: 3 }, { name: 'Lateral raise', sets: 3 }, { name: 'Triceps pushdown', sets: 3 }
+  ]},
+  { id: 't2', name: 'Pull A', exercises: [
+    { name: 'Markløft', sets: 4 }, { name: 'Pull-ups', sets: 3 },
+    { name: 'Roing', sets: 3 }, { name: 'Lat pulldown', sets: 3 }, { name: 'Bicep curl', sets: 3 }
+  ]},
+  { id: 't3', name: 'Bein A', exercises: [
+    { name: 'Knebøy', sets: 4 }, { name: 'Romanian deadlift', sets: 3 },
+    { name: 'Leg press', sets: 3 }, { name: 'Lunges', sets: 3 }, { name: 'Hip thrust', sets: 3 }
+  ]},
+];
+
+let sessions = loadLS('sessions', []);
+let exerciseLib = loadLS('exerciseLib', [...DEFAULT_EXERCISES]);
+let templates = loadLS('templates', DEFAULT_TEMPLATES);
+
+// Log state
+let logExercises = [];
+let editingTemplateId = null;
+let tplExercises = []; // exercises in template editor
+
+let weightChart = null;
+let volumeChart = null;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function uid() { return Math.random().toString(36).slice(2,9); }
+function loadLS(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } }
+function saveLS(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { return new Date(d).toLocaleDateString('nb-NO', {weekday:'short', day:'numeric', month:'short'}); }
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--accent)';
+  t.style.color = color ? '#fff' : 'var(--bg)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2600);
+}
+
+function blankSet(prev) {
+  return { id: uid(), weight: prev ? prev.weight : '', reps: prev ? prev.reps : '', restAfter: prev ? prev.restAfter : '' };
+}
+function blankExercise() { return { id: uid(), name: '', sets: [blankSet()], restAfter: '' }; }
+
+// ─── View management ──────────────────────────────────────────────────────────
+function setView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.textContent.trim() === {log:'LOG',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'}[name])
+      b.classList.add('active');
+  });
+  if (name === 'history') renderHistory();
+  if (name === 'progress') renderProgressSelect();
+  if (name === 'exercises') renderLibList();
+  if (name === 'templates') renderTemplates();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  document.getElementById('logDate').textContent = fmtDate(todayStr()).toUpperCase();
+  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+  logExercises = [blankExercise()];
+  renderExercises();
+}
+
+// ─── Exercise log ─────────────────────────────────────────────────────────────
+function addExercise() {
+  logExercises.push(blankExercise());
+  renderExercises();
+}
+
+function removeExercise(id) {
+  if (logExercises.length <= 1) return;
+  logExercises = logExercises.filter(e => e.id !== id);
+  renderExercises();
+}
+
+function addSet(exId) {
+  const ex = logExercises.find(e => e.id === exId);
+  const last = ex.sets[ex.sets.length - 1];
+  ex.sets.push(blankSet(last));
+  renderExercises();
+}
+
+function removeSet(exId, setId) {
+  const ex = logExercises.find(e => e.id === exId);
+  if (ex.sets.length <= 1) return;
+  ex.sets = ex.sets.filter(s => s.id !== setId);
+  renderExercises();
+}
+
+function updateExField(exId, field, val) {
+  const ex = logExercises.find(e => e.id === exId);
+  if (ex) ex[field] = val;
+}
+
+function updateSetField(exId, setId, field, val) {
+  const ex = logExercises.find(e => e.id === exId);
+  if (!ex) return;
+  const set = ex.sets.find(s => s.id === setId);
+  if (set) set[field] = val;
+}
+
+function renderExercises() {
+  const defaultRest = document.getElementById('defaultRest').value;
+  const container = document.getElementById('exerciseList');
+  container.innerHTML = logExercises.map((ex, ei) => `
+    <div class="ex-card">
+      <div class="ex-card-head">
+        <span class="ex-num">${String(ei+1).padStart(2,'0')}</span>
+        <select onchange="updateExField('${ex.id}','name',this.value)">
+          <option value="">— Vel øving —</option>
+          ${exerciseLib.map(n => `<option value="${n}" ${ex.name===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+        ${logExercises.length > 1 ? `<button onclick="removeExercise('${ex.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1">×</button>` : ''}
+      </div>
+      <div class="ex-card-body">
+        <div class="set-grid-head">
+          <span>#</span><span>KG</span><span>REPS</span><span>PAUSE</span><span></span>
+        </div>
+        ${ex.sets.map((s,si) => `
+          <div class="set-row">
+            <span class="set-num">${si+1}</span>
+            <input type="number" inputmode="decimal" placeholder="kg" value="${s.weight}" onchange="updateSetField('${ex.id}','${s.id}','weight',this.value)">
+            <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps}" onchange="updateSetField('${ex.id}','${s.id}','reps',this.value)">
+            <input type="number" inputmode="numeric" placeholder="${defaultRest||'s'}" value="${s.restAfter}" onchange="updateSetField('${ex.id}','${s.id}','restAfter',this.value)">
+            <button class="set-del" onclick="removeSet('${ex.id}','${s.id}')">×</button>
+          </div>`).join('')}
+        <div class="set-footer">
+          <button class="btn-ghost" onclick="addSet('${ex.id}')">+ SETT</button>
+          <div class="rest-after-row">
+            <span>PAUSE ETTER ØVING</span>
+            <input type="number" inputmode="numeric" placeholder="${defaultRest||'s'}" value="${ex.restAfter}" onchange="updateExField('${ex.id}','restAfter',this.value)">
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Save session ─────────────────────────────────────────────────────────────
+function saveSession() {
+  const validEx = logExercises.filter(e => e.name && e.sets.some(s => s.reps));
+  if (!validEx.length) { showToast('Legg til minst éi øving med reps', 'var(--red)'); return; }
+  const warmup = {
+    type: document.getElementById('warmupType').value,
+    min: document.getElementById('warmupMin').value,
+    km: document.getElementById('warmupKm').value
+  };
+  const session = {
+    id: uid(),
+    date: todayStr(),
+    note: document.getElementById('sessionNote').value,
+    warmup: warmup.type ? warmup : null,
+    exercises: validEx
+  };
+  sessions.unshift(session);
+  saveLS('sessions', sessions);
+  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+
+  // Reset form
+  logExercises = [blankExercise()];
+  renderExercises();
+  document.getElementById('warmupType').value = '';
+  document.getElementById('warmupMin').value = '';
+  document.getElementById('warmupKm').value = '';
+  document.getElementById('sessionNote').value = '';
+
+  showToast('Økt lagra! Genererer PDF...');
+  setTimeout(() => generatePDF(session), 400);
+  setTimeout(() => syncToDrive(), 1200);
+}
+
+// ─── PDF generation ───────────────────────────────────────────────────────────
+function generatePDF(session) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, margin = 18;
+  let y = margin;
+
+  // Header
+  doc.setFillColor(9,9,16);
+  doc.rect(0, 0, W, 40, 'F');
+  doc.setTextColor(201, 245, 66);
+  doc.setFontSize(28);
+  doc.setFont('helvetica', 'bold');
+  doc.text('LØFT', margin, y + 10);
+  doc.setFontSize(8);
+  doc.setTextColor(74, 74, 106);
+  doc.setFont('helvetica', 'normal');
+  doc.text('TRENINGSDAGBOK', margin, y + 18);
+  doc.setTextColor(226, 221, 214);
+  doc.text(fmtDate(session.date).toUpperCase(), W - margin, y + 10, { align: 'right' });
+  y = 48;
+
+  // Warmup
+  if (session.warmup?.type) {
+    doc.setFontSize(7);
+    doc.setTextColor(74, 74, 106);
+    doc.text('OPPVARMING', margin, y);
+    y += 5;
+    doc.setTextColor(226, 221, 214);
+    doc.setFontSize(9);
+    let warmupText = session.warmup.type;
+    if (session.warmup.min) warmupText += `  ·  ${session.warmup.min} min`;
+    if (session.warmup.km) warmupText += `  ·  ${session.warmup.km} km`;
+    doc.text(warmupText, margin, y);
+    y += 8;
+  }
+
+  // Exercises
+  session.exercises.forEach((ex, ei) => {
+    if (y > 260) { doc.addPage(); y = margin; }
+    // Exercise name
+    doc.setFillColor(20, 20, 40);
+    doc.rect(margin - 2, y - 4, W - margin*2 + 4, 8, 'F');
+    doc.setFontSize(7);
+    doc.setTextColor(201, 245, 66);
+    doc.text(ex.name.toUpperCase(), margin, y);
+    y += 6;
+
+    // Set header
+    doc.setFontSize(6.5);
+    doc.setTextColor(74, 74, 106);
+    doc.text('SETT', margin, y);
+    doc.text('KG', margin + 20, y);
+    doc.text('REPS', margin + 40, y);
+    doc.text('VOLUM', margin + 60, y);
+    if (ex.restAfter || ex.sets.some(s => s.restAfter)) doc.text('PAUSE', margin + 85, y);
+    y += 4;
+    doc.setDrawColor(28, 28, 46);
+    doc.line(margin, y, W - margin, y);
+    y += 3;
+
+    // Sets
+    ex.sets.filter(s => s.reps).forEach((s, si) => {
+      const vol = (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
+      doc.setFontSize(8);
+      doc.setTextColor(226, 221, 214);
+      doc.text(String(si + 1), margin, y);
+      doc.text(s.weight ? s.weight + ' kg' : '—', margin + 20, y);
+      doc.text(s.reps + ' reps', margin + 40, y);
+      doc.text(vol > 0 ? vol.toLocaleString('nb-NO') + ' kg' : '—', margin + 60, y);
+      if (s.restAfter) doc.text(s.restAfter + 's', margin + 85, y);
+      y += 5.5;
+    });
+
+    // Volume summary
+    const totalVol = ex.sets.reduce((a, s) => a + (parseFloat(s.weight)||0)*(parseInt(s.reps)||0), 0);
+    if (totalVol > 0) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(74, 74, 106);
+      doc.text('TOTAL VOLUM: ' + totalVol.toLocaleString('nb-NO') + ' KG', margin, y);
+      y += 4;
+    }
+    if (ex.restAfter) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(74, 74, 106);
+      doc.text('Pause etter øving: ' + ex.restAfter + 's', margin, y);
+      y += 4;
+    }
+    y += 3;
+  });
+
+  // Total volume
+  const totalAll = session.exercises.reduce((a, e) =>
+    a + e.sets.reduce((b, s) => b + (parseFloat(s.weight)||0)*(parseInt(s.reps)||0), 0), 0);
+  if (totalAll > 0) {
+    doc.setDrawColor(201, 245, 66);
+    doc.line(margin, y, W - margin, y);
+    y += 5;
+    doc.setFontSize(8);
+    doc.setTextColor(201, 245, 66);
+    doc.text('TOTAL VOLUM: ' + totalAll.toLocaleString('nb-NO') + ' KG', margin, y);
+    y += 7;
+  }
+
+  // Note
+  if (session.note) {
+    doc.setFontSize(7.5);
+    doc.setTextColor(74, 74, 106);
+    doc.text('NOTAT', margin, y); y += 4;
+    doc.setTextColor(226, 221, 214);
+    const lines = doc.splitTextToSize(session.note, W - margin*2);
+    doc.text(lines, margin, y);
+  }
+
+  // Footer
+  doc.setFontSize(6);
+  doc.setTextColor(74, 74, 106);
+  doc.text('LØFT – Treningsdagbok', W/2, 292, { align: 'center' });
+
+  const filename = `løft-${session.date}.pdf`;
+  doc.save(filename);
+  showToast('PDF lasta ned!');
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  if (!sessions.length) { container.innerHTML = '<div class="empty">INGEN ØKTER ENDÅ</div>'; return; }
+  container.innerHTML = sessions.map(s => {
+    const vol = s.exercises.reduce((a,e) => a + e.sets.reduce((b,st) => b + (parseFloat(st.weight)||0)*(parseInt(st.reps)||0), 0), 0);
+    return `
+    <div class="hist-card">
+      <div class="hist-head" onclick="toggleHist('${s.id}')">
+        <div>
+          <div class="hist-date">${fmtDate(s.date).toUpperCase()}</div>
+          <div class="hist-exnames">${s.exercises.map(e=>e.name).join(', ')}</div>
+          ${vol > 0 ? `<div class="hist-vol">${vol.toLocaleString('nb-NO')} KG VOLUM</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
+          <span class="hist-toggle" id="tog-${s.id}">▼</span>
+          <button class="btn-ghost" style="font-size:0.48rem;padding:0.2rem 0.5rem" onclick="event.stopPropagation();generatePDF(${JSON.stringify(s).replace(/"/g,'&quot;')})">PDF</button>
+        </div>
+      </div>
+      <div class="hist-body" id="hb-${s.id}">
+        ${s.warmup?.type ? `<div class="hist-warmup">🏃 ${s.warmup.type}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>` : ''}
+        ${s.exercises.map(ex => `
+          <div style="margin-bottom:0.65rem">
+            <div class="hist-ex-name">${ex.name.toUpperCase()}</div>
+            ${ex.sets.filter(st=>st.reps).map((st,j) => `
+              <div class="hist-set-row">
+                <span>Sett ${j+1}</span>
+                ${st.weight?`<span>${st.weight} kg</span>`:''}
+                <span>${st.reps} reps</span>
+                ${st.restAfter?`<span>⏱ ${st.restAfter}s</span>`:''}
+              </div>`).join('')}
+            ${ex.restAfter?`<div style="font-size:0.54rem;color:var(--muted);margin-top:0.12rem">Pause etter: ${ex.restAfter}s</div>`:''}
+          </div>`).join('')}
+        ${s.note ? `<div class="hist-note">${s.note}</div>` : ''}
+        <div style="display:flex;gap:0.5rem;margin-top:0.65rem">
+          <button class="btn-danger" onclick="deleteSession('${s.id}')">SLETT ØKT</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleHist(id) {
+  const body = document.getElementById('hb-' + id);
+  const tog = document.getElementById('tog-' + id);
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲' : '▼';
+}
+
+function deleteSession(id) {
+  sessions = sessions.filter(s => s.id !== id);
+  saveLS('sessions', sessions);
+  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+  renderHistory();
+  syncToDrive();
+}
+
+// ─── Templates ────────────────────────────────────────────────────────────────
+function renderTemplates() {
+  const container = document.getElementById('templateList');
+  if (!templates.length) { container.innerHTML = '<div class="empty">INGEN MALAR ENDÅ</div>'; return; }
+  container.innerHTML = templates.map(t => `
+    <div class="tpl-card">
+      <div class="tpl-head">
+        <div>
+          <div class="tpl-name">${t.name}</div>
+          <div class="tpl-sub">${t.exercises.length} øvingar · ${t.exercises.map(e=>e.name).join(', ')}</div>
+        </div>
+        <div class="tpl-actions">
+          <button class="btn-ghost" style="font-size:0.5rem" onclick="editTemplate('${t.id}')">REDIGER</button>
+          <button class="btn-accent-outline" style="font-size:0.5rem" onclick="loadTemplate('${t.id}')">START</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function loadTemplate(id) {
+  const tpl = templates.find(t => t.id === id);
+  if (!tpl) return;
+  logExercises = tpl.exercises.map(te => ({
+    id: uid(), name: te.name,
+    sets: Array.from({ length: te.sets || 3 }, () => blankSet()),
+    restAfter: ''
+  }));
+  setView('log');
+  renderExercises();
+  showToast(`Malen "${tpl.name}" er lasta inn!`);
+}
+
+function openNewTemplateModal() {
+  editingTemplateId = null;
+  document.getElementById('templateModalTitle').textContent = 'NY ØKTMAL';
+  document.getElementById('tplNameInput').value = '';
+  tplExercises = [{ id: uid(), name: '', sets: 3 }];
+  renderTplExList();
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function editTemplate(id) {
+  const tpl = templates.find(t => t.id === id);
+  if (!tpl) return;
+  editingTemplateId = id;
+  document.getElementById('templateModalTitle').textContent = 'REDIGER MAL';
+  document.getElementById('tplNameInput').value = tpl.name;
+  tplExercises = tpl.exercises.map(e => ({ id: uid(), name: e.name, sets: e.sets }));
+  renderTplExList();
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('open');
+}
+
+function addTplEx() {
+  tplExercises.push({ id: uid(), name: '', sets: 3 });
+  renderTplExList();
+}
+
+function removeTplEx(id) {
+  tplExercises = tplExercises.filter(e => e.id !== id);
+  renderTplExList();
+}
+
+function updateTplEx(id, field, val) {
+  const ex = tplExercises.find(e => e.id === id);
+  if (ex) ex[field] = field === 'sets' ? parseInt(val)||1 : val;
+}
+
+function renderTplExList() {
+  document.getElementById('tplExList').innerHTML = tplExercises.map((ex, i) => `
+    <div class="tpl-editor">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+        <span style="font-size:0.5rem;color:var(--muted);letter-spacing:0.12em">ØVING ${i+1}</span>
+        ${tplExercises.length > 1 ? `<button class="btn-danger" style="padding:0.15rem 0.4rem" onclick="removeTplEx('${ex.id}')">SLETT</button>` : ''}
+      </div>
+      <div class="tpl-ex-editor">
+        <select onchange="updateTplEx('${ex.id}','name',this.value)">
+          <option value="">— Vel øving —</option>
+          ${exerciseLib.map(n => `<option value="${n}" ${ex.name===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+        <input type="number" class="tpl-sets-input" inputmode="numeric" placeholder="sett" value="${ex.sets}" min="1" max="20" onchange="updateTplEx('${ex.id}','sets',this.value)">
+        <span style="font-size:0.52rem;color:var(--muted);white-space:nowrap">sett</span>
+      </div>
+    </div>`).join('');
+}
+
+function saveTemplate() {
+  const name = document.getElementById('tplNameInput').value.trim();
+  if (!name) { showToast('Gi malen eit namn', 'var(--red)'); return; }
+  const exercises = tplExercises.filter(e => e.name);
+  if (!exercises.length) { showToast('Legg til minst éi øving', 'var(--red)'); return; }
+  if (editingTemplateId) {
+    templates = templates.map(t => t.id === editingTemplateId ? { ...t, name, exercises } : t);
+  } else {
+    templates.push({ id: uid(), name, exercises });
+  }
+  saveLS('templates', templates);
+  closeTemplateModal();
+  renderTemplates();
+  showToast(editingTemplateId ? 'Mal oppdatert!' : 'Mal lagra!');
+}
+
+// ─── Progress charts ──────────────────────────────────────────────────────────
+function renderProgressSelect() {
+  const names = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name)))];
+  const sel = document.getElementById('progressExSelect');
+  sel.innerHTML = '<option value="">—</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (names[0]) { sel.value = names[0]; renderProgressCharts(); }
+}
+
+function renderProgressCharts() {
+  const name = document.getElementById('progressExSelect').value;
+  if (!name) return;
+  const data = sessions.slice().reverse()
+    .filter(s => s.exercises.some(e => e.name === name))
+    .map(s => {
+      const ex = s.exercises.find(e => e.name === name);
+      const maxW = Math.max(...ex.sets.map(st => parseFloat(st.weight)||0));
+      const vol = ex.sets.reduce((a,st) => a+(parseFloat(st.weight)||0)*(parseInt(st.reps)||0), 0);
+      return { label: fmtDate(s.date), maxW, vol };
+    });
+
+  const chartCfg = (label, dataKey, color) => ({
+    type: 'line',
+    data: {
+      labels: data.map(d => d.label),
+      datasets: [{ label, data: data.map(d => d[dataKey]), borderColor: color, backgroundColor: color+'22', tension: 0.3, pointRadius: 4, pointBackgroundColor: color, fill: true }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#4a4a6a', font: { size: 9 } }, grid: { color: '#1c1c2e' } },
+        y: { ticks: { color: '#4a4a6a', font: { size: 9 } }, grid: { color: '#1c1c2e' } }
+      }
+    }
+  });
+
+  if (weightChart) weightChart.destroy();
+  if (volumeChart) volumeChart.destroy();
+  const wCtx = document.getElementById('chartWeight').getContext('2d');
+  const vCtx = document.getElementById('chartVolume').getContext('2d');
+  Chart.defaults.color = '#4a4a6a';
+  weightChart = new Chart(wCtx, chartCfg('Maks kg', 'maxW', '#c9f542'));
+  volumeChart = new Chart(vCtx, chartCfg('Volum', 'vol', '#42b8f5'));
+}
+
+// ─── Exercise library ─────────────────────────────────────────────────────────
+function addToLib() {
+  const input = document.getElementById('newExInput');
+  const name = input.value.trim();
+  if (!name || exerciseLib.includes(name)) { showToast('Øving finst allereie eller er tom', 'var(--red)'); return; }
+  exerciseLib.push(name);
+  saveLS('exerciseLib', exerciseLib);
+  input.value = '';
+  renderLibList();
+  showToast(`"${name}" lagt til!`);
+}
+
+function removeFromLib(name) {
+  exerciseLib = exerciseLib.filter(e => e !== name);
+  saveLS('exerciseLib', exerciseLib);
+  renderLibList();
+}
+
+function renderLibList() {
+  document.getElementById('exerciseLibList').innerHTML = exerciseLib.map(name => `
+    <div class="lib-row">
+      <span>${name}</span>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        ${DEFAULT_EXERCISES.includes(name) ? '<span class="lib-tag">STANDARD</span>' : ''}
+        <button class="btn-danger" style="padding:0.18rem 0.45rem;font-size:0.48rem" onclick="removeFromLib('${name.replace(/'/g,"\\'")}')">SLETT</button>
+      </div>
+    </div>`).join('');
+}
+
+// ─── Google Drive sync ────────────────────────────────────────────────────────
+async function syncToDrive() {
+  try {
+    const payload = JSON.stringify({ sessions, exerciseLib, templates, savedAt: new Date().toISOString() });
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are a Google Drive file manager. Use the Google Drive MCP to save files. Respond with JSON only: {"success":true} or {"success":false}.',
+        messages: [{ role: 'user', content: `Save this JSON as "løft-treningsdagbok.json" in Google Drive root, replacing any existing file: ${payload}` }],
+        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'gdrive' }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const result = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if (result?.success) document.getElementById('driveSyncBtn').textContent = '✓ DRIVE';
+    else document.getElementById('driveSyncBtn').textContent = '✗ FEIL';
+  } catch {
+    document.getElementById('driveSyncBtn').textContent = '✗ FEIL';
+  }
+  setTimeout(() => document.getElementById('driveSyncBtn').textContent = '↓ DRIVE', 3000);
+}
+
+async function syncFromDrive() {
+  document.getElementById('driveSyncBtn').textContent = '⟳ SYNK...';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: 'You are a Google Drive file manager. Use the Google Drive MCP to retrieve files. Return only the raw JSON content of the file, nothing else.',
+        messages: [{ role: 'user', content: 'Find and return the full content of "løft-treningsdagbok.json" in Google Drive.' }],
+        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'gdrive' }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const result = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if (result?.sessions) {
+      sessions = result.sessions;
+      if (result.exerciseLib) exerciseLib = result.exerciseLib;
+      if (result.templates) templates = result.templates;
+      saveLS('sessions', sessions);
+      saveLS('exerciseLib', exerciseLib);
+      saveLS('templates', templates);
+      document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+      showToast('Synkronisert frå Google Drive!');
+      document.getElementById('driveSyncBtn').textContent = '✓ DRIVE';
+    } else {
+      showToast('Fann ingen data i Drive', 'var(--red)');
+      document.getElementById('driveSyncBtn').textContent = '✗ FEIL';
+    }
+  } catch {
+    showToast('Drive-feil', 'var(--red)');
+    document.getElementById('driveSyncBtn').textContent = '✗ FEIL';
+  }
+  setTimeout(() => document.getElementById('driveSyncBtn').textContent = '↓ DRIVE', 3000);
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
