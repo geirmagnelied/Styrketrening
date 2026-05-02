@@ -6,886 +6,931 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LØFT">
-<title>LØFT</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>LØFT – Treningsdagbok</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #f2f8f5;
-    --surface: #ffffff;
-    --surface2: #e4f2ec;
-    --border: #a8d5c2;
-    --text: #0d2b20;
-    --muted: #2d7a5a;
-    --accent: #0e7a4a;
-    --accent-dim: #0a5c38;
-    --red: #c0392b;
-    --blue: #1a6faa;
-    --header-bg: #0d2b20;
-    --header-muted: #7ab89a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', 'Courier New', monospace; overflow-x: hidden; font-size: 16px; }
-  body { padding-bottom: 5rem; max-width: 900px; margin: 0 auto; }
+:root {
+  --bg:       #f0f7f4;
+  --surface:  #ffffff;
+  --surface2: #e2f0ea;
+  --border:   #9ecfbb;
+  --text:     #0c2419;
+  --muted:    #2d7a58;
+  --accent:   #0e7a4a;
+  --accentd:  #095c37;
+  --blue:     #1a6faa;
+  --red:      #c0392b;
+  --hbg:      #0c2419;
+  --hmuted:   #6aaf90;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; font-size: 16px; overflow-x: hidden; }
+body { padding-bottom: 6rem; max-width: 860px; margin: 0 auto; }
 
-  header { padding: 2rem 1.5rem 0.9rem; border-bottom: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: flex-end; background: var(--header-bg); position: sticky; top: 0; z-index: 50; }
-  .logo-label { font-size: 0.85rem; letter-spacing: 0.3em; color: var(--header-muted); margin-bottom: 0.12rem; }
-  .logo { font-family: 'DM Serif Display', Georgia, serif; font-size: 2.83rem; letter-spacing: -0.04em; line-height: 1; color: #ffffff; }
-  .header-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
-  .session-count { font-size: 0.85rem; color: var(--header-muted); letter-spacing: 0.12em; }
-  .header-btns { display: flex; gap: 0.5rem; }
-  .drive-btn { font-family: inherit; font-size: 0.85rem; letter-spacing: 0.14em; background: none; border: 1px solid var(--header-muted); border-radius: 4px; color: var(--header-muted); padding: 0.38rem 0.85rem; cursor: pointer; transition: all 0.15s; }
-  .drive-btn:hover { border-color: #fff; color: #fff; }
+/* ── Header ── */
+header {
+  background: var(--hbg);
+  padding: 2.2rem 1.4rem 0.9rem;
+  border-bottom: 3px solid var(--accent);
+  display: flex; justify-content: space-between; align-items: flex-end;
+  position: sticky; top: 0; z-index: 60;
+}
+.logo-sub { font-size: 0.62rem; letter-spacing: 0.3em; color: var(--hmuted); margin-bottom: 0.1rem; }
+.logo { font-family: 'DM Serif Display', serif; font-size: 2.2rem; color: #fff; letter-spacing: -0.03em; line-height: 1; }
+.hright { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+.h-count { font-size: 0.68rem; color: var(--hmuted); letter-spacing: 0.1em; }
+.h-btns { display: flex; gap: 0.5rem; }
+.h-btn {
+  font-family: inherit; font-size: 0.72rem; letter-spacing: 0.12em;
+  background: none; border: 1px solid var(--hmuted); border-radius: 5px;
+  color: var(--hmuted); padding: 0.38rem 0.8rem; cursor: pointer; transition: all 0.15s;
+}
+.h-btn:hover { border-color: #fff; color: #fff; }
+.h-btn.syncing { color: #fff; border-color: #fff; animation: pulse 1s infinite; }
+.h-btn.ok { color: #6ef7a0; border-color: #6ef7a0; }
+.h-btn.err { color: #f77; border-color: #f77; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-  nav { display: flex; border-bottom: 2px solid var(--border); background: var(--surface); position: sticky; top: 5.8rem; z-index: 49; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-  nav::-webkit-scrollbar { display: none; }
-  .nav-btn { flex: 1; min-width: 5rem; padding: 0.9rem 0.4rem; background: none; border: none; border-bottom: 3px solid transparent; color: var(--muted); font-family: inherit; font-size: 0.85rem; letter-spacing: 0.14em; cursor: pointer; transition: all 0.15s; white-space: nowrap; font-weight: 600; }
-  .nav-btn:hover { color: var(--accent); background: var(--surface2); }
-  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--surface2); font-weight: 700; }
+/* ── Nav ── */
+nav {
+  display: flex; background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 5.6rem; z-index: 50;
+  overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+nav::-webkit-scrollbar { display: none; }
+.nb {
+  flex: 1; min-width: 4.2rem; padding: 0.85rem 0.3rem;
+  background: none; border: none; border-bottom: 3px solid transparent;
+  color: var(--muted); font-family: inherit; font-size: 0.68rem;
+  letter-spacing: 0.13em; cursor: pointer; white-space: nowrap;
+  font-weight: 600; transition: all 0.15s;
+}
+.nb:hover { background: var(--surface2); color: var(--accent); }
+.nb.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--surface2); font-weight: 700; }
 
-  main { padding: 1.5rem; }
-  .view { display: none; }
-  .view.active { display: block; }
+/* ── Main ── */
+main { padding: 1.4rem; }
+.view { display: none; }
+.view.active { display: block; }
 
-  #toast { position: fixed; top: 0.75rem; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 0.65rem 1.3rem; border-radius: 6px; font-size: 0.97rem; font-weight: 600; letter-spacing: 0.1em; z-index: 999; display: none; white-space: nowrap; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+/* ── Toast ── */
+#toast {
+  position: fixed; top: 0.8rem; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #fff;
+  padding: 0.6rem 1.3rem; border-radius: 6px;
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em;
+  z-index: 999; display: none; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
 
-  .sm-label { font-size: 0.89rem; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 0.32rem; font-weight: 700; }
-  .section-label { font-size: 0.85rem; color: var(--accent); letter-spacing: 0.2em; margin-bottom: 0.55rem; font-weight: 700; }
+/* ── Typography helpers ── */
+.sec-label { font-size: 0.72rem; color: var(--accent); letter-spacing: 0.2em; font-weight: 700; margin-bottom: 0.6rem; }
+.sm-label  { font-size: 0.72rem; color: var(--muted);  letter-spacing: 0.12em; font-weight: 700; margin-bottom: 0.28rem; }
+.date-line { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.2em; font-weight: 700; margin-bottom: 1.1rem; }
 
-  input, select, textarea {
-    background: var(--surface); border: 2px solid var(--border); border-radius: 5px;
-    color: var(--text); font-family: inherit; font-size: 1.24rem;
-    padding: 0.55rem 0.75rem; width: 100%; outline: none;
-    -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M0 0l6 7 6-7z' fill='%230e7a4a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.7rem center; padding-right: 2rem; background-color: var(--surface); }
-  textarea { resize: none; }
-  input::placeholder, textarea::placeholder { color: #9cc4b4; }
+/* ── Inputs ── */
+input, select, textarea {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 5px; color: var(--text); font-family: inherit;
+  font-size: 1rem; padding: 0.55rem 0.75rem; width: 100%;
+  outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M0 0l6 7 6-7z' fill='%230e7a4a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.7rem center;
+  padding-right: 2rem;
+}
+textarea { resize: none; }
+input::placeholder, textarea::placeholder { color: #9ecfbb; }
 
-  .btn-ghost { background: var(--surface); border: 2px solid var(--border); border-radius: 5px; color: var(--muted); font-family: inherit; font-size: 0.94rem; letter-spacing: 0.12em; padding: 0.5rem 1rem; cursor: pointer; font-weight: 600; transition: all 0.15s; }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-primary { background: var(--accent); border: none; border-radius: 5px; color: #fff; font-family: inherit; font-size: 1.06rem; letter-spacing: 0.18em; padding: 1.05rem 1rem; font-weight: 700; width: 100%; cursor: pointer; transition: background 0.15s; }
-  .btn-primary:hover { background: var(--accent-dim); }
-  .btn-danger { background: none; border: 2px solid var(--red); border-radius: 5px; color: var(--red); font-family: inherit; font-size: 0.89rem; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.15s; }
-  .btn-danger:hover { background: var(--red); color: #fff; }
-  .btn-accent-outline { background: none; border: 2px solid var(--accent); border-radius: 5px; color: var(--accent); font-family: inherit; font-size: 0.94rem; letter-spacing: 0.12em; padding: 0.5rem 1rem; cursor: pointer; white-space: nowrap; font-weight: 700; transition: all 0.15s; }
-  .btn-accent-outline:hover { background: var(--accent); color: #fff; }
-  .btn-add-dashed { width: 100%; padding: 0.78rem; background: var(--surface2); border: 2px dashed var(--border); border-radius: 5px; color: var(--muted); font-size: 0.94rem; letter-spacing: 0.16em; cursor: pointer; font-family: inherit; margin-bottom: 1rem; font-weight: 600; transition: all 0.15s; }
-  .btn-add-dashed:hover { border-color: var(--accent); color: var(--accent); }
+/* ── Buttons ── */
+.btn {
+  font-family: inherit; font-weight: 600; letter-spacing: 0.13em;
+  border-radius: 5px; cursor: pointer; transition: all 0.15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem;
+}
+.btn-primary { background: var(--accent); border: none; color: #fff; font-size: 0.9rem; padding: 1rem; width: 100%; }
+.btn-primary:hover { background: var(--accentd); }
+.btn-ghost { background: var(--surface); border: 2px solid var(--border); color: var(--muted); font-size: 0.78rem; padding: 0.5rem 1rem; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: none; border: 2px solid var(--red); color: var(--red); font-size: 0.72rem; padding: 0.32rem 0.75rem; }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.btn-outline { background: none; border: 2px solid var(--accent); color: var(--accent); font-size: 0.78rem; padding: 0.5rem 1rem; white-space: nowrap; }
+.btn-outline:hover { background: var(--accent); color: #fff; }
+.btn-dashed { width: 100%; padding: 0.75rem; background: var(--surface2); border: 2px dashed var(--border); color: var(--muted); font-size: 0.78rem; letter-spacing: 0.15em; font-family: inherit; font-weight: 600; cursor: pointer; border-radius: 5px; transition: all 0.15s; margin-bottom: 0.9rem; }
+.btn-dashed:hover { border-color: var(--accent); color: var(--accent); }
 
-  .section-box { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; padding: 1.1rem; margin-bottom: 1.2rem; }
+/* ── Cards / Boxes ── */
+.box { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1.1rem; }
 
-  .ex-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .ex-card-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1.1rem; border-bottom: 2px solid var(--border); background: var(--surface2); }
-  .ex-num { font-size: 0.89rem; color: var(--accent); min-width: 1.6rem; font-weight: 700; }
-  .ex-card-head select { flex: 1; border: none; background: none; padding: 0; color: var(--text); font-size: 1.24rem; background-image: none; font-weight: 600; }
-  .ex-card-head select:focus { outline: none; }
-  .ex-card-body { padding: 0.9rem 1.1rem; }
-  .set-grid-head { display: grid; grid-template-columns: 2rem 1fr 1fr 4rem 2.2rem; gap: 0.4rem; margin-bottom: 0.45rem; }
-  .set-grid-head span { font-size: 0.83rem; color: var(--muted); letter-spacing: 0.1em; font-weight: 700; }
-  .set-row { display: grid; grid-template-columns: 2rem 1fr 1fr 4rem 2.2rem; gap: 0.4rem; margin-bottom: 0.4rem; align-items: center; }
-  .set-num { font-size: 0.94rem; color: var(--blue); font-weight: 700; }
-  .set-del { background: none; border: none; color: #bbb; cursor: pointer; font-size: 1.42rem; padding: 0; line-height: 1; transition: color 0.15s; }
-  .set-del:hover { color: var(--red); }
-  .set-footer { display: flex; gap: 0.6rem; margin-top: 0.7rem; align-items: center; flex-wrap: wrap; }
-  .rest-after-row { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
-  .rest-after-row span { font-size: 0.83rem; color: var(--muted); white-space: nowrap; font-weight: 600; }
-  .rest-after-row input { width: 4.5rem; }
+/* ── Exercise card ── */
+.ex-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.ex-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; border-bottom: 2px solid var(--border); background: var(--surface2); }
+.ex-num { font-size: 0.72rem; color: var(--accent); font-weight: 700; min-width: 1.5rem; }
+.ex-head select { flex: 1; border: none; background: none; padding: 0; font-size: 1rem; font-weight: 600; color: var(--text); background-image: none; }
+.ex-head select:focus { outline: none; }
+.ex-body { padding: 0.85rem 1rem; }
+.set-hdr { display: grid; grid-template-columns: 2rem 1fr 1fr 4rem 2rem; gap: 0.4rem; margin-bottom: 0.4rem; }
+.set-hdr span { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; font-weight: 700; }
+.set-row { display: grid; grid-template-columns: 2rem 1fr 1fr 4rem 2rem; gap: 0.4rem; margin-bottom: 0.35rem; align-items: center; }
+.set-n { font-size: 0.78rem; color: var(--blue); font-weight: 700; }
+.set-del { background: none; border: none; color: #bbb; cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 0; transition: color 0.15s; }
+.set-del:hover { color: var(--red); }
+.set-foot { display: flex; gap: 0.6rem; margin-top: 0.7rem; align-items: center; flex-wrap: wrap; }
+.rest-row { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+.rest-row span { font-size: 0.68rem; color: var(--muted); white-space: nowrap; font-weight: 600; }
+.rest-row input { width: 4.5rem; }
 
-  .def-rest-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
-  .def-rest-row span { font-size: 0.89rem; color: var(--muted); letter-spacing: 0.12em; white-space: nowrap; font-weight: 600; }
-  .def-rest-row input { width: 6rem; }
+/* ── History ── */
+.hist-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 0.8rem; overflow: hidden; }
+.hist-head { padding: 0.95rem 1.1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.hist-head:hover { background: var(--surface2); }
+.hist-date { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.14em; font-weight: 700; margin-bottom: 0.12rem; }
+.hist-names { font-size: 0.92rem; font-weight: 500; }
+.hist-vol { font-size: 0.7rem; color: var(--accent); font-weight: 700; margin-top: 0.1rem; }
+.hist-body { display: none; border-top: 2px solid var(--border); padding: 0.9rem 1.1rem; background: var(--surface2); }
+.hist-body.open { display: block; }
+.hist-ex { font-size: 0.68rem; color: var(--accent); letter-spacing: 0.14em; font-weight: 700; margin-bottom: 0.25rem; margin-top: 0.6rem; }
+.hist-set { font-size: 0.85rem; color: var(--text); display: flex; gap: 1rem; margin-bottom: 0.12rem; }
+.hist-warm { font-size: 0.82rem; color: var(--blue); font-weight: 600; margin-bottom: 0.5rem; }
+.hist-note { font-size: 0.78rem; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 0.4rem; margin-top: 0.3rem; }
 
-  .date-label { font-size: 0.92rem; color: var(--muted); letter-spacing: 0.2em; margin-bottom: 1.2rem; font-weight: 700; }
+/* ── Templates ── */
+.tpl-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 0.8rem; overflow: hidden; }
+.tpl-head { padding: 0.95rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; }
+.tpl-info .tpl-name { font-size: 1rem; font-weight: 700; }
+.tpl-info .tpl-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.1rem; }
+.tpl-btns { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
-  .hist-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 0.8rem; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-  .hist-head { padding: 1rem 1.2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; }
-  .hist-head:hover { background: var(--surface2); }
-  .hist-date { font-size: 0.85rem; color: var(--muted); letter-spacing: 0.14em; margin-bottom: 0.18rem; font-weight: 700; }
-  .hist-exnames { font-size: 1.12rem; color: var(--text); font-weight: 500; }
-  .hist-vol { font-size: 0.89rem; color: var(--accent); margin-top: 0.15rem; letter-spacing: 0.1em; font-weight: 700; }
-  .hist-toggle { font-size: 1.0rem; color: var(--muted); }
-  .hist-body { border-top: 2px solid var(--border); padding: 1rem 1.2rem; display: none; background: var(--surface2); }
-  .hist-body.open { display: block; }
-  .hist-ex-name { font-size: 0.89rem; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 0.32rem; font-weight: 700; }
-  .hist-set-row { font-size: 1.04rem; color: var(--text); display: flex; gap: 1rem; margin-bottom: 0.18rem; }
-  .hist-warmup { font-size: 1.0rem; color: var(--blue); margin-bottom: 0.7rem; font-weight: 600; }
-  .hist-note { font-size: 0.97rem; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.3rem; }
+/* ── Modal ── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border-radius: 14px 14px 0 0; border-top: 3px solid var(--accent); width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; padding: 1.8rem 1.4rem 2.5rem; position: relative; }
+.modal-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 1.1rem; }
+.modal-x { position: absolute; top: 1.2rem; right: 1.4rem; background: none; border: none; font-size: 1.6rem; color: var(--muted); cursor: pointer; line-height: 1; }
+.tpl-ex-row { background: var(--surface2); border: 2px solid var(--border); border-radius: 5px; padding: 0.9rem; margin-bottom: 0.7rem; }
+.tpl-ex-grid { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.4rem; }
+.tpl-ex-grid select { flex: 1; }
+.tpl-sets-inp { width: 4rem; }
 
-  .empty { text-align: center; color: var(--muted); padding: 3.5rem 0; font-size: 1.04rem; letter-spacing: 0.15em; }
+/* ── Library ── */
+.lib-list { border: 2px solid var(--border); border-radius: 6px; overflow: hidden; }
+.lib-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 1rem; font-size: 0.9rem; }
+.lib-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.lib-row:nth-child(even) { background: var(--surface2); }
+.lib-tag { font-size: 0.58rem; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); padding: 0.15rem 0.45rem; border-radius: 3px; }
 
-  .chart-wrap { position: relative; height: 210px; margin-bottom: 2rem; background: var(--surface); border: 2px solid var(--border); border-radius: 6px; padding: 1rem; }
+/* ── Progress charts ── */
+.chart-box { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; padding: 1rem; height: 210px; margin-bottom: 1.5rem; position: relative; }
 
-  .tpl-card { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; margin-bottom: 0.85rem; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-  .tpl-head { padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: center; }
-  .tpl-name { font-size: 1.24rem; color: var(--text); font-weight: 700; }
-  .tpl-sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.15rem; }
-  .tpl-actions { display: flex; gap: 0.5rem; }
+/* ── Empty ── */
+.empty { text-align: center; color: var(--muted); padding: 3.5rem 0; font-size: 0.85rem; letter-spacing: 0.15em; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; justify-content: center; align-items: flex-end; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 14px 14px 0 0; width: 100%; max-width: 900px; margin: 0 auto; max-height: 90vh; overflow-y: auto; padding: 1.8rem 1.5rem 2.5rem; border-top: 3px solid var(--accent); }
-  .modal-title { font-size: 1.3rem; letter-spacing: 0.1em; margin-bottom: 1.2rem; color: var(--text); font-weight: 700; }
-  .modal-close { position: absolute; right: 1.5rem; font-size: 1.89rem; background: none; border: none; color: var(--muted); cursor: pointer; line-height: 1; }
-
-  .lib-list { border: 2px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .lib-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.1rem; font-size: 1.12rem; color: var(--text); }
-  .lib-row:not(:last-child) { border-bottom: 1px solid var(--border); }
-  .lib-row:nth-child(even) { background: var(--surface2); }
-  .lib-tag { font-size: 0.73rem; color: var(--muted); letter-spacing: 0.1em; background: var(--surface2); padding: 0.18rem 0.5rem; border-radius: 3px; border: 1px solid var(--border); }
-
-  .tpl-editor { background: var(--surface2); border: 2px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.9rem; }
-  .tpl-ex-editor { display: flex; gap: 0.5rem; margin-bottom: 0.4rem; align-items: center; }
-  .tpl-ex-editor select { flex: 1; }
-  .tpl-sets-input { width: 4.2rem; }
-
-  /* Export/import panel */
-  .data-panel { background: var(--surface); border: 2px solid var(--border); border-radius: 6px; padding: 1.1rem; margin-bottom: 1.2rem; }
-  .data-panel-title { font-size: 0.89rem; color: var(--accent); font-weight: 700; letter-spacing: 0.15em; margin-bottom: 0.8rem; }
-  .data-panel-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+/* ── Misc ── */
+.def-rest { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.1rem; }
+.def-rest span { font-size: 0.72rem; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.def-rest input { width: 5.5rem; }
+.row2 { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
 </style>
 </head>
 <body>
-
 <div id="toast"></div>
 
+<!-- HEADER -->
 <header>
   <div>
-    <div class="logo-label">TRENINGSDAGBOK</div>
+    <div class="logo-sub">TRENINGSDAGBOK</div>
     <div class="logo">LØFT</div>
   </div>
-  <div class="header-right">
-    <div class="session-count" id="sessionCount">0 ØKTER</div>
-    <div class="header-btns">
-      <button class="drive-btn" id="syncBtn" onclick="loadFromServer()">☁ SYNK</button>
-      <button class="drive-btn" onclick="exportData()" title="Last ned backup som JSON-fil">⬇ BACKUP</button>
+  <div class="hright">
+    <div class="h-count" id="hCount">0 ØKTER</div>
+    <div class="h-btns">
+      <button class="h-btn btn" id="syncBtn" onclick="syncNow()">☁ SYNK</button>
+      <button class="h-btn btn" onclick="exportBackup()">⬇ BACKUP</button>
     </div>
   </div>
 </header>
 
+<!-- NAV -->
 <nav>
-  <button class="nav-btn active" onclick="setView('log')">LOG</button>
-  <button class="nav-btn" onclick="setView('templates')">MALAR</button>
-  <button class="nav-btn" onclick="setView('history')">HISTORIKK</button>
-  <button class="nav-btn" onclick="setView('progress')">PROGRESJON</button>
-  <button class="nav-btn" onclick="setView('exercises')">ØVINGAR</button>
+  <button class="nb active" onclick="gotoView('log')">LOG</button>
+  <button class="nb" onclick="gotoView('templates')">MALAR</button>
+  <button class="nb" onclick="gotoView('history')">HISTORIKK</button>
+  <button class="nb" onclick="gotoView('progress')">PROGRESJON</button>
+  <button class="nb" onclick="gotoView('exercises')">ØVINGAR</button>
 </nav>
 
 <main>
 
-  <!-- ══ LOG VIEW ══════════════════════════════════════════════════════════ -->
-  <div id="view-log" class="view active">
-    <div class="date-label" id="logDate"></div>
+<!-- ═══════════════ LOG VIEW ═══════════════ -->
+<div id="view-log" class="view active">
+  <div class="date-line" id="logDate"></div>
 
-    <!-- Warmup -->
-    <div class="section-label">OPPVARMING</div>
-    <div class="section-box">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">
-        <div>
-          <div class="sm-label">Type</div>
-          <select id="warmupType">
-            <option value="">—</option>
-            <option>Løping</option><option>Sykling</option><option>Roing</option>
-            <option>Gåing</option><option>Ellipse</option><option>Hopping</option>
-            <option>Dynamisk tøying</option><option>Anna</option>
-          </select>
-        </div>
-        <div>
-          <div class="sm-label">Tid (min)</div>
-          <input type="number" id="warmupMin" placeholder="0" inputmode="decimal">
-        </div>
-        <div>
-          <div class="sm-label">Km</div>
-          <input type="number" id="warmupKm" placeholder="0.0" inputmode="decimal">
-        </div>
+  <!-- Warmup -->
+  <div class="sec-label">OPPVARMING</div>
+  <div class="box">
+    <div class="row3">
+      <div>
+        <div class="sm-label">Type</div>
+        <select id="wuType">
+          <option value="">— Ingen —</option>
+        </select>
+      </div>
+      <div>
+        <div class="sm-label">Tid (min)</div>
+        <input type="number" id="wuMin" placeholder="0" inputmode="decimal">
+      </div>
+      <div>
+        <div class="sm-label">Km</div>
+        <input type="number" id="wuKm" placeholder="0.0" inputmode="decimal">
       </div>
     </div>
-
-    <!-- Default rest -->
-    <div class="def-rest-row">
-      <span>STD PAUSE (sek)</span>
-      <input type="number" id="defaultRest" placeholder="60" inputmode="numeric">
-    </div>
-
-    <!-- Exercises -->
-    <div id="exerciseList"></div>
-    <button class="btn-add-dashed" onclick="addExercise()">+ LEGG TIL ØVING</button>
-
-    <textarea id="sessionNote" placeholder="Notat (valgfritt)..." rows="2" style="margin-bottom:0.9rem"></textarea>
-    <button class="btn-primary" onclick="saveSession()">LAGRE ØKT</button>
   </div>
 
-  <!-- ══ TEMPLATES VIEW ════════════════════════════════════════════════════ -->
-  <div id="view-templates" class="view">
-    <div class="date-label">ØKTMALAR</div>
-    <button class="btn-ghost" onclick="openNewTemplateModal()" style="margin-bottom:1rem;width:100%">+ LAG NY MAL</button>
-    <div id="templateList"></div>
+  <!-- Default rest -->
+  <div class="def-rest">
+    <span>STD PAUSE (sek)</span>
+    <input type="number" id="defRest" placeholder="60" inputmode="numeric">
   </div>
 
-  <!-- ══ HISTORY VIEW ══════════════════════════════════════════════════════ -->
-  <div id="view-history" class="view">
-    <div class="date-label">TRENINGSHISTORIKK</div>
-    <div id="historyList"></div>
-  </div>
+  <!-- Exercise list -->
+  <div id="exList"></div>
+  <button class="btn-dashed btn" onclick="addExercise()">+ LEGG TIL ØVING</button>
 
-  <!-- ══ PROGRESS VIEW ════════════════════════════════════════════════════ -->
-  <div id="view-progress" class="view">
-    <div class="sm-label">Vel øving</div>
-    <select id="progressExSelect" onchange="renderProgressCharts()" style="margin-bottom:1.2rem"></select>
-    <div class="section-label">MAKS VEKT (KG)</div>
-    <div class="chart-wrap"><canvas id="chartWeight"></canvas></div>
-    <div class="section-label">TOTAL VOLUM (KG × REPS)</div>
-    <div class="chart-wrap"><canvas id="chartVolume"></canvas></div>
-  </div>
+  <textarea id="sessionNote" placeholder="Notat om økta..." rows="2" style="margin-bottom:1rem"></textarea>
+  <button class="btn btn-primary" onclick="saveSession()">LAGRE ØKT</button>
+</div>
 
-  <!-- ══ EXERCISES VIEW ════════════════════════════════════════════════════ -->
-  <div id="view-exercises" class="view">
-    <div class="date-label">ØVINGSBIBLIOTEK</div>
-    <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem">
-      <input type="text" id="newExInput" placeholder="Ny øving..." onkeydown="if(event.key==='Enter')addToLib()">
-      <button class="btn-accent-outline" onclick="addToLib()">+ LEGG TIL</button>
-    </div>
-    <div class="lib-list" id="exerciseLibList"></div>
+<!-- ═══════════════ TEMPLATES VIEW ═══════════════ -->
+<div id="view-templates" class="view">
+  <div class="date-line">ØKTMALAR</div>
+  <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="openTplModal(null)">+ LAG NY MAL</button>
+  <div id="tplList"></div>
+</div>
+
+<!-- ═══════════════ HISTORY VIEW ═══════════════ -->
+<div id="view-history" class="view">
+  <div class="date-line">TRENINGSHISTORIKK</div>
+  <div id="histList"></div>
+</div>
+
+<!-- ═══════════════ PROGRESS VIEW ═══════════════ -->
+<div id="view-progress" class="view">
+  <div class="sm-label">Vel øving</div>
+  <select id="progSel" onchange="drawCharts()" style="margin-bottom:1.2rem"></select>
+  <div class="sec-label">MAKS VEKT (KG)</div>
+  <div class="chart-box"><canvas id="cW"></canvas></div>
+  <div class="sec-label">TOTAL VOLUM (KG × REPS)</div>
+  <div class="chart-box"><canvas id="cV"></canvas></div>
+</div>
+
+<!-- ═══════════════ EXERCISES VIEW ═══════════════ -->
+<div id="view-exercises" class="view">
+  <div class="date-line">ØVINGS- OG OPPVARMINGSBIBLIOTEK</div>
+
+  <div class="sec-label">STYRKEØVINGAR</div>
+  <div class="row2" style="margin-bottom:0.9rem">
+    <input type="text" id="newExInp" placeholder="Ny styrkeøving..." onkeydown="if(event.key==='Enter')addExLib()">
+    <button class="btn btn-outline" onclick="addExLib()">+ LEGG TIL</button>
   </div>
+  <div class="lib-list" id="exLibList" style="margin-bottom:1.6rem"></div>
+
+  <div class="sec-label">OPPVARMINGSTYPAR</div>
+  <div class="row2" style="margin-bottom:0.9rem">
+    <input type="text" id="newWuInp" placeholder="Ny oppvarmingstype..." onkeydown="if(event.key==='Enter')addWuLib()">
+    <button class="btn btn-outline" onclick="addWuLib()">+ LEGG TIL</button>
+  </div>
+  <div class="lib-list" id="wuLibList"></div>
+</div>
 
 </main>
 
-<!-- ══ NEW TEMPLATE MODAL ═════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="templateModal">
-  <div class="modal" style="position:relative">
-    <button class="modal-close" onclick="closeTemplateModal()">×</button>
-    <div class="modal-title" id="templateModalTitle">NY ØKTMAL</div>
+<!-- ═══════════════ TEMPLATE MODAL ═══════════════ -->
+<div class="modal-bg" id="tplModal">
+  <div class="modal">
+    <button class="modal-x btn" onclick="closeTplModal()">×</button>
+    <div class="modal-title" id="tplModalTitle">NY ØKTMAL</div>
     <div class="sm-label">Namn på malen</div>
-    <input type="text" id="tplNameInput" placeholder="t.d. Push A" style="margin-bottom:0.9rem">
-    <div class="sm-label" style="margin-bottom:0.4rem">ØVINGAR I MALEN</div>
-    <div id="tplExList"></div>
-    <button class="btn-ghost" onclick="addTplEx()" style="width:100%;margin-bottom:1rem">+ LEGG TIL ØVING I MAL</button>
-    <button class="btn-primary" onclick="saveTemplate()">LAGRE MAL</button>
+    <input type="text" id="tplName" placeholder="t.d. Push A" style="margin-bottom:1rem">
+    <div class="sm-label" style="margin-bottom:0.5rem">ØVINGAR</div>
+    <div id="tplExItems"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="addTplExRow()">+ LEGG TIL ØVING</button>
+    <button class="btn btn-primary" onclick="saveTpl()">LAGRE MAL</button>
   </div>
 </div>
 
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-const DEFAULT_EXERCISES = [
-  "Benkpress","Knebøy","Markløft","Skulderpress","Pull-ups",
-  "Roing","Bicep curl","Triceps pushdown","Lunges","Leg press",
-  "Lateral raise","Face pull","Hip thrust","Romanian deadlift",
-  "Dips","Hammer curl","Incline benkpress","Cable row","Lat pulldown","Planke"
+// ══════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════
+const API = 'https://script.google.com/macros/s/AKfycbwxh2A9EXAHMdIALgZ9PBSWxN5Az7jEbqi7PmozjEXa8pTbQ54Z6Y3rvfwzFJ60uljetg/exec';
+
+const DEF_EXERCISES = [
+  'Benkpress','Knebøy','Markløft','Skulderpress','Pull-ups','Roing',
+  'Bicep curl','Triceps pushdown','Lunges','Leg press','Lateral raise',
+  'Face pull','Hip thrust','Romanian deadlift','Dips','Hammer curl',
+  'Incline benkpress','Cable row','Lat pulldown','Planke'
 ];
 
-const DEFAULT_TEMPLATES = [
-  { id: 't1', name: 'Push A', exercises: [
-    { name: 'Benkpress', sets: 4 }, { name: 'Skulderpress', sets: 3 },
-    { name: 'Incline benkpress', sets: 3 }, { name: 'Lateral raise', sets: 3 }, { name: 'Triceps pushdown', sets: 3 }
+const DEF_WARMUP = ['Løping','Sykling','Roing','Gåing','Ellipse','Hopping','Dynamisk tøying'];
+
+const DEF_TEMPLATES = [
+  { id:'t1', name:'Push A', exercises:[
+    {name:'Benkpress',sets:4},{name:'Skulderpress',sets:3},
+    {name:'Incline benkpress',sets:3},{name:'Lateral raise',sets:3},{name:'Triceps pushdown',sets:3}
   ]},
-  { id: 't2', name: 'Pull A', exercises: [
-    { name: 'Markløft', sets: 4 }, { name: 'Pull-ups', sets: 3 },
-    { name: 'Roing', sets: 3 }, { name: 'Lat pulldown', sets: 3 }, { name: 'Bicep curl', sets: 3 }
+  { id:'t2', name:'Pull A', exercises:[
+    {name:'Markløft',sets:4},{name:'Pull-ups',sets:3},
+    {name:'Roing',sets:3},{name:'Lat pulldown',sets:3},{name:'Bicep curl',sets:3}
   ]},
-  { id: 't3', name: 'Bein A', exercises: [
-    { name: 'Knebøy', sets: 4 }, { name: 'Romanian deadlift', sets: 3 },
-    { name: 'Leg press', sets: 3 }, { name: 'Lunges', sets: 3 }, { name: 'Hip thrust', sets: 3 }
-  ]},
+  { id:'t3', name:'Bein A', exercises:[
+    {name:'Knebøy',sets:4},{name:'Romanian deadlift',sets:3},
+    {name:'Leg press',sets:3},{name:'Lunges',sets:3},{name:'Hip thrust',sets:3}
+  ]}
 ];
 
-let sessions = loadLS('sessions', []);
-let exerciseLib = loadLS('exerciseLib', [...DEFAULT_EXERCISES]);
-let templates = loadLS('templates', DEFAULT_TEMPLATES);
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let sessions    = lsGet('sessions',   []);
+let exLib       = lsGet('exLib',      [...DEF_EXERCISES]);
+let wuLib       = lsGet('wuLib',      [...DEF_WARMUP]);
+let templates   = lsGet('templates',  DEF_TEMPLATES);
 
-// Log state
-let logExercises = [];
-let editingTemplateId = null;
-let tplExercises = []; // exercises in template editor
+let logExs      = [];          // exercises currently in log form
+let editTplId   = null;        // null = new template, else id
+let tplRows     = [];          // rows in template modal
+let chartW      = null;
+let chartV      = null;
 
-let weightChart = null;
-let volumeChart = null;
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function uid()  { return Math.random().toString(36).slice(2,9); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function lsGet(k,fb){ try{ return JSON.parse(localStorage.getItem(k))??fb; }catch{ return fb; } }
+function lsSet(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function uid() { return Math.random().toString(36).slice(2,9); }
-function loadLS(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } }
-function saveLS(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
-function todayStr() { return new Date().toISOString().split('T')[0]; }
-function fmtDate(d) { return new Date(d).toLocaleDateString('nb-NO', {weekday:'short', day:'numeric', month:'short'}); }
-
-function showToast(msg, color) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = color || 'var(--accent)';
-  t.style.color = color ? '#fff' : 'var(--bg)';
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2600);
+function fmtDate(d){
+  return new Date(d).toLocaleDateString('nb-NO',{weekday:'short',day:'numeric',month:'short'});
 }
 
-function blankSet(prev) {
-  return { id: uid(), weight: prev ? prev.weight : '', reps: prev ? prev.reps : '', restAfter: prev ? prev.restAfter : '' };
-}
-function blankExercise() { return { id: uid(), name: '', sets: [blankSet()], restAfter: '' }; }
-
-// ─── View management ──────────────────────────────────────────────────────────
-function setView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => {
-    if (b.textContent.trim() === {log:'LOG',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'}[name])
-      b.classList.add('active');
-  });
-  if (name === 'history') renderHistory();
-  if (name === 'progress') renderProgressSelect();
-  if (name === 'exercises') renderLibList();
-  if (name === 'templates') renderTemplates();
+function toast(msg, red){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = red ? 'var(--red)' : 'var(--accent)';
+  el.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>el.style.display='none', 2800);
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-function init() {
-  document.getElementById('logDate').textContent = fmtDate(todayStr()).toUpperCase();
-  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
-  logExercises = [blankExercise()];
-  renderExercises();
+function blankSet(prev){
+  return { id:uid(), kg: prev?prev.kg:'', reps:prev?prev.reps:'', rest:prev?prev.rest:'' };
+}
+function blankEx(){ return { id:uid(), name:'', sets:[blankSet()], rest:'' }; }
+
+function saveAll(){
+  lsSet('sessions', sessions);
+  lsSet('exLib',    exLib);
+  lsSet('wuLib',    wuLib);
+  lsSet('templates',templates);
 }
 
-// ─── Exercise log ─────────────────────────────────────────────────────────────
-function addExercise() {
-  logExercises.push(blankExercise());
-  renderExercises();
+// ══════════════════════════════════════════════════════════
+// SYNC (Google Sheets)
+// ══════════════════════════════════════════════════════════
+function setSyncBtn(state){
+  const b = document.getElementById('syncBtn');
+  b.className = 'h-btn btn';
+  if(state==='syncing'){ b.textContent='⟳ HENTAR...'; b.classList.add('syncing'); }
+  else if(state==='ok'){ b.textContent='✓ LAGRA'; b.classList.add('ok'); setTimeout(()=>setSyncBtn('idle'),3000); }
+  else if(state==='err'){ b.textContent='✗ FEIL'; b.classList.add('err'); setTimeout(()=>setSyncBtn('idle'),4000); }
+  else { b.textContent='☁ SYNK'; }
 }
 
-function removeExercise(id) {
-  if (logExercises.length <= 1) return;
-  logExercises = logExercises.filter(e => e.id !== id);
-  renderExercises();
+async function pushToServer(){
+  const payload = { sessions, exLib, wuLib, templates, at: new Date().toISOString() };
+  try {
+    await fetch(API, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    setSyncBtn('ok');
+  } catch(e) {
+    console.error(e);
+    setSyncBtn('err');
+  }
 }
 
-function addSet(exId) {
-  const ex = logExercises.find(e => e.id === exId);
-  const last = ex.sets[ex.sets.length - 1];
-  ex.sets.push(blankSet(last));
-  renderExercises();
+async function syncNow(){
+  setSyncBtn('syncing');
+  try {
+    const res  = await fetch(API + '?t=' + Date.now());
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if(data && (data.sessions || data.exLib)){
+      if(data.sessions)  { sessions  = data.sessions;  lsSet('sessions',sessions); }
+      if(data.exLib)     { exLib     = data.exLib;     lsSet('exLib',exLib); }
+      if(data.wuLib)     { wuLib     = data.wuLib;     lsSet('wuLib',wuLib); }
+      if(data.templates) { templates = data.templates; lsSet('templates',templates); }
+      document.getElementById('hCount').textContent = sessions.length + ' ØKTER';
+      refreshWuSelect();
+      toast('Synkronisert! ' + sessions.length + ' økter.');
+      setSyncBtn('ok');
+    } else {
+      toast('Ingen serverdata endå – brukar lokale data.');
+      setSyncBtn('idle');
+    }
+  } catch(e){
+    console.error(e);
+    toast('Klarte ikkje hente data frå server.', true);
+    setSyncBtn('err');
+  }
 }
 
-function removeSet(exId, setId) {
-  const ex = logExercises.find(e => e.id === exId);
-  if (ex.sets.length <= 1) return;
-  ex.sets = ex.sets.filter(s => s.id !== setId);
-  renderExercises();
+function exportBackup(){
+  const blob = new Blob([JSON.stringify({sessions,exLib,wuLib,templates},null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'loft-backup-' + today() + '.json';
+  a.click();
+  toast('Backup lasta ned!');
 }
 
-function updateExField(exId, field, val) {
-  const ex = logExercises.find(e => e.id === exId);
-  if (ex) ex[field] = val;
+// ══════════════════════════════════════════════════════════
+// VIEW ROUTING
+// ══════════════════════════════════════════════════════════
+function gotoView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  const labels={log:'LOG',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'};
+  document.querySelectorAll('.nb').forEach(b=>{ if(b.textContent.trim()===labels[name]) b.classList.add('active'); });
+  if(name==='history')   renderHistory();
+  if(name==='templates') renderTemplates();
+  if(name==='progress')  renderProgSelect();
+  if(name==='exercises') renderLibs();
 }
 
-function updateSetField(exId, setId, field, val) {
-  const ex = logExercises.find(e => e.id === exId);
-  if (!ex) return;
-  const set = ex.sets.find(s => s.id === setId);
-  if (set) set[field] = val;
+// ══════════════════════════════════════════════════════════
+// WARMUP SELECT
+// ══════════════════════════════════════════════════════════
+function refreshWuSelect(){
+  const sel = document.getElementById('wuType');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Ingen —</option>' +
+    wuLib.map(w=>`<option value="${esc(w)}" ${cur===w?'selected':''}>${esc(w)}</option>`).join('');
 }
 
-function renderExercises() {
-  const defaultRest = document.getElementById('defaultRest').value;
-  const container = document.getElementById('exerciseList');
-  container.innerHTML = logExercises.map((ex, ei) => `
+// ══════════════════════════════════════════════════════════
+// LOG – EXERCISES
+// ══════════════════════════════════════════════════════════
+function addExercise(){
+  logExs.push(blankEx());
+  renderExList();
+}
+
+function removeEx(id){
+  if(logExs.length<=1) return;
+  logExs = logExs.filter(e=>e.id!==id);
+  renderExList();
+}
+
+function addSet(exId){
+  const ex = logExs.find(e=>e.id===exId);
+  ex.sets.push(blankSet(ex.sets[ex.sets.length-1]));
+  renderExList();
+}
+
+function removeSet(exId, setId){
+  const ex = logExs.find(e=>e.id===exId);
+  if(ex.sets.length<=1) return;
+  ex.sets = ex.sets.filter(s=>s.id!==setId);
+  renderExList();
+}
+
+function setExName(id, val){  const e=logExs.find(x=>x.id===id); if(e) e.name=val; }
+function setExRest(id, val){  const e=logExs.find(x=>x.id===id); if(e) e.rest=val; }
+function setSetField(exId,setId,field,val){ const e=logExs.find(x=>x.id===exId); if(!e) return; const s=e.sets.find(x=>x.id===setId); if(s) s[field]=val; }
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function exOptions(selected){
+  return '<option value="">— Vel øving —</option>' +
+    exLib.map(n=>`<option value="${esc(n)}" ${selected===n?'selected':''}>${esc(n)}</option>`).join('');
+}
+
+function renderExList(){
+  const defRest = document.getElementById('defRest').value;
+  document.getElementById('exList').innerHTML = logExs.map((ex,ei)=>`
     <div class="ex-card">
-      <div class="ex-card-head">
+      <div class="ex-head">
         <span class="ex-num">${String(ei+1).padStart(2,'0')}</span>
-        <select onchange="updateExField('${ex.id}','name',this.value)">
-          <option value="">— Vel øving —</option>
-          ${exerciseLib.map(n => `<option value="${n}" ${ex.name===n?'selected':''}>${n}</option>`).join('')}
-        </select>
-        ${logExercises.length > 1 ? `<button onclick="removeExercise('${ex.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1">×</button>` : ''}
+        <select onchange="setExName('${ex.id}',this.value)">${exOptions(ex.name)}</select>
+        ${logExs.length>1
+          ? `<button class="set-del btn" onclick="removeEx('${ex.id}')" style="font-size:1.3rem">×</button>`
+          : ''}
       </div>
-      <div class="ex-card-body">
-        <div class="set-grid-head">
-          <span>#</span><span>KG</span><span>REPS</span><span>PAUSE</span><span></span>
-        </div>
-        ${ex.sets.map((s,si) => `
+      <div class="ex-body">
+        <div class="set-hdr"><span>#</span><span>KG</span><span>REPS</span><span>PAUSE</span><span></span></div>
+        ${ex.sets.map((s,si)=>`
           <div class="set-row">
-            <span class="set-num">${si+1}</span>
-            <input type="number" inputmode="decimal" placeholder="kg" value="${s.weight}" onchange="updateSetField('${ex.id}','${s.id}','weight',this.value)">
-            <input type="number" inputmode="numeric" placeholder="reps" value="${s.reps}" onchange="updateSetField('${ex.id}','${s.id}','reps',this.value)">
-            <input type="number" inputmode="numeric" placeholder="${defaultRest||'s'}" value="${s.restAfter}" onchange="updateSetField('${ex.id}','${s.id}','restAfter',this.value)">
+            <span class="set-n">${si+1}</span>
+            <input type="number" inputmode="decimal" placeholder="kg" value="${esc(s.kg)}"
+              onchange="setSetField('${ex.id}','${s.id}','kg',this.value)">
+            <input type="number" inputmode="numeric" placeholder="reps" value="${esc(s.reps)}"
+              onchange="setSetField('${ex.id}','${s.id}','reps',this.value)">
+            <input type="number" inputmode="numeric" placeholder="${esc(defRest)||'s'}" value="${esc(s.rest)}"
+              onchange="setSetField('${ex.id}','${s.id}','rest',this.value)">
             <button class="set-del" onclick="removeSet('${ex.id}','${s.id}')">×</button>
           </div>`).join('')}
-        <div class="set-footer">
-          <button class="btn-ghost" onclick="addSet('${ex.id}')">+ SETT</button>
-          <div class="rest-after-row">
+        <div class="set-foot">
+          <button class="btn btn-ghost" onclick="addSet('${ex.id}')">+ SETT</button>
+          <div class="rest-row">
             <span>PAUSE ETTER ØVING</span>
-            <input type="number" inputmode="numeric" placeholder="${defaultRest||'s'}" value="${ex.restAfter}" onchange="updateExField('${ex.id}','restAfter',this.value)">
+            <input type="number" inputmode="numeric" placeholder="${esc(defRest)||'s'}" value="${esc(ex.rest)}"
+              onchange="setExRest('${ex.id}',this.value)">
           </div>
         </div>
       </div>
     </div>`).join('');
 }
 
-// ─── Save session ─────────────────────────────────────────────────────────────
-function saveSession() {
-  const validEx = logExercises.filter(e => e.name && e.sets.some(s => s.reps));
-  if (!validEx.length) { showToast('Legg til minst éi øving med reps', 'var(--red)'); return; }
-  const warmup = {
-    type: document.getElementById('warmupType').value,
-    min: document.getElementById('warmupMin').value,
-    km: document.getElementById('warmupKm').value
+// ══════════════════════════════════════════════════════════
+// SAVE SESSION
+// ══════════════════════════════════════════════════════════
+function saveSession(){
+  const validExs = logExs.filter(e=>e.name && e.sets.some(s=>s.reps));
+  if(!validExs.length){ toast('Legg til minst éi øving med reps!', true); return; }
+
+  const wu = {
+    type: document.getElementById('wuType').value,
+    min:  document.getElementById('wuMin').value,
+    km:   document.getElementById('wuKm').value
   };
+
   const session = {
-    id: uid(),
-    date: todayStr(),
+    id: uid(), date: today(),
     note: document.getElementById('sessionNote').value,
-    warmup: warmup.type ? warmup : null,
-    exercises: validEx
+    warmup: wu.type ? wu : null,
+    exercises: validExs
   };
+
   sessions.unshift(session);
-  saveLS('sessions', sessions);
-  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+  saveAll();
+  document.getElementById('hCount').textContent = sessions.length + ' ØKTER';
 
   // Reset form
-  logExercises = [blankExercise()];
-  renderExercises();
-  document.getElementById('warmupType').value = '';
-  document.getElementById('warmupMin').value = '';
-  document.getElementById('warmupKm').value = '';
-  document.getElementById('sessionNote').value = '';
+  logExs = [blankEx()];
+  renderExList();
+  ['wuType','wuMin','wuKm','sessionNote'].forEach(id=>document.getElementById(id).value='');
 
-  setSyncStatus('syncing');
-  saveToServer();
-  showToast('Økt lagra!');
-  setTimeout(() => generatePDF(session), 400);
+  toast('Økt lagra! Lagar PDF...');
+  setTimeout(()=>makePDF(session), 400);
+  pushToServer();
 }
 
-// ─── PDF generation ───────────────────────────────────────────────────────────
-function generatePDF(session) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const W = 210, margin = 18;
-  let y = margin;
+// ══════════════════════════════════════════════════════════
+// PDF
+// ══════════════════════════════════════════════════════════
+function makePDF(s){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210, M=18; let y=M;
 
-  // Header
-  doc.setFillColor(9,9,16);
-  doc.rect(0, 0, W, 40, 'F');
-  doc.setTextColor(201, 245, 66);
-  doc.setFontSize(28);
-  doc.setFont('helvetica', 'bold');
-  doc.text('LØFT', margin, y + 10);
-  doc.setFontSize(8);
-  doc.setTextColor(74, 74, 106);
-  doc.setFont('helvetica', 'normal');
-  doc.text('TRENINGSDAGBOK', margin, y + 18);
-  doc.setTextColor(226, 221, 214);
-  doc.text(fmtDate(session.date).toUpperCase(), W - margin, y + 10, { align: 'right' });
-  y = 48;
+  doc.setFillColor(12,36,25); doc.rect(0,0,W,42,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(30); doc.setFont('helvetica','bold');
+  doc.text('LØFT', M, y+11);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.setTextColor(106,175,144); doc.text('TRENINGSDAGBOK', M, y+19);
+  doc.setTextColor(255,255,255); doc.text(fmtDate(s.date).toUpperCase(), W-M, y+11, {align:'right'});
+  y=50;
 
-  // Warmup
-  if (session.warmup?.type) {
-    doc.setFontSize(7);
-    doc.setTextColor(74, 74, 106);
-    doc.text('OPPVARMING', margin, y);
-    y += 5;
-    doc.setTextColor(226, 221, 214);
-    doc.setFontSize(9);
-    let warmupText = session.warmup.type;
-    if (session.warmup.min) warmupText += `  ·  ${session.warmup.min} min`;
-    if (session.warmup.km) warmupText += `  ·  ${session.warmup.km} km`;
-    doc.text(warmupText, margin, y);
-    y += 8;
+  if(s.warmup?.type){
+    doc.setFontSize(7); doc.setTextColor(106,175,144); doc.text('OPPVARMING', M, y); y+=5;
+    doc.setFontSize(9); doc.setTextColor(12,36,25);
+    let wt = s.warmup.type;
+    if(s.warmup.min) wt+='  ·  '+s.warmup.min+' min';
+    if(s.warmup.km)  wt+='  ·  '+s.warmup.km+' km';
+    doc.text(wt, M, y); y+=9;
   }
 
-  // Exercises
-  session.exercises.forEach((ex, ei) => {
-    if (y > 260) { doc.addPage(); y = margin; }
-    // Exercise name
-    doc.setFillColor(20, 20, 40);
-    doc.rect(margin - 2, y - 4, W - margin*2 + 4, 8, 'F');
-    doc.setFontSize(7);
-    doc.setTextColor(201, 245, 66);
-    doc.text(ex.name.toUpperCase(), margin, y);
-    y += 6;
+  s.exercises.forEach(ex=>{
+    if(y>258){ doc.addPage(); y=M; }
+    doc.setFillColor(226,240,234); doc.rect(M-2,y-4,W-M*2+4,8,'F');
+    doc.setFontSize(7.5); doc.setTextColor(14,122,74); doc.setFont('helvetica','bold');
+    doc.text(ex.name.toUpperCase(), M, y); y+=7;
 
-    // Set header
-    doc.setFontSize(6.5);
-    doc.setTextColor(74, 74, 106);
-    doc.text('SETT', margin, y);
-    doc.text('KG', margin + 20, y);
-    doc.text('REPS', margin + 40, y);
-    doc.text('VOLUM', margin + 60, y);
-    if (ex.restAfter || ex.sets.some(s => s.restAfter)) doc.text('PAUSE', margin + 85, y);
-    y += 4;
-    doc.setDrawColor(28, 28, 46);
-    doc.line(margin, y, W - margin, y);
-    y += 3;
+    doc.setFontSize(6.5); doc.setTextColor(106,175,144); doc.setFont('helvetica','normal');
+    doc.text('SETT', M, y); doc.text('KG', M+22,y); doc.text('REPS', M+42,y); doc.text('VOLUM', M+62,y);
+    if(ex.sets.some(s=>s.rest)||ex.rest) doc.text('PAUSE',M+87,y);
+    y+=3.5;
+    doc.setDrawColor(158,207,187); doc.line(M,y,W-M,y); y+=4;
 
-    // Sets
-    ex.sets.filter(s => s.reps).forEach((s, si) => {
-      const vol = (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
-      doc.setFontSize(8);
-      doc.setTextColor(226, 221, 214);
-      doc.text(String(si + 1), margin, y);
-      doc.text(s.weight ? s.weight + ' kg' : '—', margin + 20, y);
-      doc.text(s.reps + ' reps', margin + 40, y);
-      doc.text(vol > 0 ? vol.toLocaleString('nb-NO') + ' kg' : '—', margin + 60, y);
-      if (s.restAfter) doc.text(s.restAfter + 's', margin + 85, y);
-      y += 5.5;
+    ex.sets.filter(s=>s.reps).forEach((s,i)=>{
+      const vol=(parseFloat(s.kg)||0)*(parseInt(s.reps)||0);
+      doc.setFontSize(8.5); doc.setTextColor(12,36,25);
+      doc.text(String(i+1), M, y);
+      doc.text(s.kg?s.kg+' kg':'—', M+22, y);
+      doc.text(s.reps+' reps', M+42, y);
+      doc.text(vol?vol.toLocaleString('nb-NO')+' kg':'—', M+62, y);
+      if(s.rest) doc.text(s.rest+'s', M+87, y);
+      y+=5.5;
     });
 
-    // Volume summary
-    const totalVol = ex.sets.reduce((a, s) => a + (parseFloat(s.weight)||0)*(parseInt(s.reps)||0), 0);
-    if (totalVol > 0) {
-      doc.setFontSize(6.5);
-      doc.setTextColor(74, 74, 106);
-      doc.text('TOTAL VOLUM: ' + totalVol.toLocaleString('nb-NO') + ' KG', margin, y);
-      y += 4;
-    }
-    if (ex.restAfter) {
-      doc.setFontSize(6.5);
-      doc.setTextColor(74, 74, 106);
-      doc.text('Pause etter øving: ' + ex.restAfter + 's', margin, y);
-      y += 4;
-    }
-    y += 3;
+    const tv=ex.sets.reduce((a,s)=>a+(parseFloat(s.kg)||0)*(parseInt(s.reps)||0),0);
+    if(tv){ doc.setFontSize(6.5); doc.setTextColor(106,175,144); doc.text('VOLUM: '+tv.toLocaleString('nb-NO')+' KG',M,y); y+=4; }
+    if(ex.rest){ doc.text('Pause etter øving: '+ex.rest+'s',M,y); y+=4; }
+    y+=3;
   });
 
-  // Total volume
-  const totalAll = session.exercises.reduce((a, e) =>
-    a + e.sets.reduce((b, s) => b + (parseFloat(s.weight)||0)*(parseInt(s.reps)||0), 0), 0);
-  if (totalAll > 0) {
-    doc.setDrawColor(201, 245, 66);
-    doc.line(margin, y, W - margin, y);
-    y += 5;
-    doc.setFontSize(8);
-    doc.setTextColor(201, 245, 66);
-    doc.text('TOTAL VOLUM: ' + totalAll.toLocaleString('nb-NO') + ' KG', margin, y);
-    y += 7;
+  const tot=s.exercises.reduce((a,e)=>a+e.sets.reduce((b,s)=>b+(parseFloat(s.kg)||0)*(parseInt(s.reps)||0),0),0);
+  if(tot){
+    doc.setDrawColor(14,122,74); doc.line(M,y,W-M,y); y+=5;
+    doc.setFontSize(9); doc.setTextColor(14,122,74); doc.setFont('helvetica','bold');
+    doc.text('TOTAL VOLUM: '+tot.toLocaleString('nb-NO')+' KG', M, y); y+=8;
   }
 
-  // Note
-  if (session.note) {
-    doc.setFontSize(7.5);
-    doc.setTextColor(74, 74, 106);
-    doc.text('NOTAT', margin, y); y += 4;
-    doc.setTextColor(226, 221, 214);
-    const lines = doc.splitTextToSize(session.note, W - margin*2);
-    doc.text(lines, margin, y);
+  if(s.note){
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(106,175,144);
+    doc.text('NOTAT',M,y); y+=4;
+    doc.setTextColor(12,36,25);
+    doc.text(doc.splitTextToSize(s.note,W-M*2),M,y);
   }
 
-  // Footer
-  doc.setFontSize(6);
-  doc.setTextColor(74, 74, 106);
-  doc.text('LØFT – Treningsdagbok', W/2, 292, { align: 'center' });
-
-  const filename = `løft-${session.date}.pdf`;
-  doc.save(filename);
-  showToast('PDF lasta ned!');
+  doc.setFontSize(6); doc.setTextColor(158,207,187);
+  doc.text('LØFT – Treningsdagbok', W/2, 292, {align:'center'});
+  doc.save('loft-'+s.date+'.pdf');
+  toast('PDF lasta ned!');
 }
 
-// ─── History ──────────────────────────────────────────────────────────────────
-function renderHistory() {
-  const container = document.getElementById('historyList');
-  if (!sessions.length) { container.innerHTML = '<div class="empty">INGEN ØKTER ENDÅ</div>'; return; }
-  container.innerHTML = sessions.map(s => {
-    const vol = s.exercises.reduce((a,e) => a + e.sets.reduce((b,st) => b + (parseFloat(st.weight)||0)*(parseInt(st.reps)||0), 0), 0);
+// ══════════════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════════════
+function renderHistory(){
+  const el = document.getElementById('histList');
+  if(!sessions.length){ el.innerHTML='<div class="empty">INGEN ØKTER ENDÅ</div>'; return; }
+  el.innerHTML = sessions.map(s=>{
+    const vol=s.exercises.reduce((a,e)=>a+e.sets.reduce((b,st)=>b+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0),0);
     return `
     <div class="hist-card">
       <div class="hist-head" onclick="toggleHist('${s.id}')">
         <div>
           <div class="hist-date">${fmtDate(s.date).toUpperCase()}</div>
-          <div class="hist-exnames">${s.exercises.map(e=>e.name).join(', ')}</div>
-          ${vol > 0 ? `<div class="hist-vol">${vol.toLocaleString('nb-NO')} KG VOLUM</div>` : ''}
+          <div class="hist-names">${s.exercises.map(e=>esc(e.name)).join(', ')}</div>
+          ${vol?`<div class="hist-vol">${vol.toLocaleString('nb-NO')} KG VOLUM</div>`:''}
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem">
-          <span class="hist-toggle" id="tog-${s.id}">▼</span>
-          <button class="btn-ghost" style="font-size:0.72rem;padding:0.35rem 0.7rem" onclick="event.stopPropagation();generatePDF(${JSON.stringify(s).replace(/"/g,'&quot;')})">PDF</button>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem">
+          <span style="font-size:0.85rem;color:var(--muted)" id="htog-${s.id}">▼</span>
+          <button class="btn btn-ghost" style="font-size:0.72rem;padding:0.3rem 0.7rem"
+            onclick="event.stopPropagation();makePDF(${JSON.stringify(s).replace(/"/g,'&quot;')})">PDF</button>
         </div>
       </div>
       <div class="hist-body" id="hb-${s.id}">
-        ${s.warmup?.type ? `<div class="hist-warmup">🏃 ${s.warmup.type}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>` : ''}
-        ${s.exercises.map(ex => `
-          <div style="margin-bottom:0.65rem">
-            <div class="hist-ex-name">${ex.name.toUpperCase()}</div>
-            ${ex.sets.filter(st=>st.reps).map((st,j) => `
-              <div class="hist-set-row">
-                <span>Sett ${j+1}</span>
-                ${st.weight?`<span>${st.weight} kg</span>`:''}
-                <span>${st.reps} reps</span>
-                ${st.restAfter?`<span>⏱ ${st.restAfter}s</span>`:''}
-              </div>`).join('')}
-            ${ex.restAfter?`<div style="font-size:0.54rem;color:var(--muted);margin-top:0.12rem">Pause etter: ${ex.restAfter}s</div>`:''}
-          </div>`).join('')}
-        ${s.note ? `<div class="hist-note">${s.note}</div>` : ''}
-        <div style="display:flex;gap:0.5rem;margin-top:0.65rem">
-          <button class="btn-danger" onclick="deleteSession('${s.id}')">SLETT ØKT</button>
+        ${s.warmup?.type?`<div class="hist-warm">🏃 ${esc(s.warmup.type)}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>`:''}
+        ${s.exercises.map(ex=>`
+          <div class="hist-ex">${esc(ex.name).toUpperCase()}</div>
+          ${ex.sets.filter(st=>st.reps).map((st,j)=>`
+            <div class="hist-set">
+              <span>Sett ${j+1}</span>
+              ${st.kg?`<span>${esc(st.kg)} kg</span>`:''}
+              <span>${esc(st.reps)} reps</span>
+              ${st.rest?`<span>⏱ ${esc(st.rest)}s</span>`:''}
+            </div>`).join('')}
+          ${ex.rest?`<div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.3rem">Pause etter: ${esc(ex.rest)}s</div>`:''}`).join('')}
+        ${s.note?`<div class="hist-note">${esc(s.note)}</div>`:''}
+        <div style="margin-top:0.8rem">
+          <button class="btn btn-danger" onclick="deleteSession('${s.id}')">SLETT ØKT</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleHist(id) {
-  const body = document.getElementById('hb-' + id);
-  const tog = document.getElementById('tog-' + id);
-  const open = body.classList.toggle('open');
-  tog.textContent = open ? '▲' : '▼';
+function toggleHist(id){
+  const b=document.getElementById('hb-'+id), t=document.getElementById('htog-'+id);
+  const open=b.classList.toggle('open');
+  t.textContent=open?'▲':'▼';
 }
 
-function deleteSession(id) {
-  sessions = sessions.filter(s => s.id !== id);
-  saveLS('sessions', sessions);
-  document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
+function deleteSession(id){
+  sessions=sessions.filter(s=>s.id!==id);
+  saveAll();
+  document.getElementById('hCount').textContent=sessions.length+' ØKTER';
   renderHistory();
-  saveToServer();
+  pushToServer();
 }
 
-// ─── Templates ────────────────────────────────────────────────────────────────
-function renderTemplates() {
-  const container = document.getElementById('templateList');
-  if (!templates.length) { container.innerHTML = '<div class="empty">INGEN MALAR ENDÅ</div>'; return; }
-  container.innerHTML = templates.map(t => `
+// ══════════════════════════════════════════════════════════
+// TEMPLATES
+// ══════════════════════════════════════════════════════════
+function renderTemplates(){
+  const el=document.getElementById('tplList');
+  if(!templates.length){ el.innerHTML='<div class="empty">INGEN MALAR ENDÅ</div>'; return; }
+  el.innerHTML=templates.map(t=>`
     <div class="tpl-card">
       <div class="tpl-head">
-        <div>
-          <div class="tpl-name">${t.name}</div>
-          <div class="tpl-sub">${t.exercises.length} øvingar · ${t.exercises.map(e=>e.name).join(', ')}</div>
+        <div class="tpl-info">
+          <div class="tpl-name">${esc(t.name)}</div>
+          <div class="tpl-sub">${t.exercises.length} øvingar · ${t.exercises.map(e=>esc(e.name)).join(', ')}</div>
         </div>
-        <div class="tpl-actions">
-          <button class="btn-ghost" style="font-size:0.75rem" onclick="editTemplate('${t.id}')">REDIGER</button>
-          <button class="btn-accent-outline" style="font-size:0.75rem" onclick="loadTemplate('${t.id}')">START</button>
+        <div class="tpl-btns">
+          <button class="btn btn-ghost" onclick="openTplModal('${t.id}')">REDIGER</button>
+          <button class="btn btn-outline" onclick="loadTpl('${t.id}')">START</button>
         </div>
       </div>
     </div>`).join('');
 }
 
-function loadTemplate(id) {
-  const tpl = templates.find(t => t.id === id);
-  if (!tpl) return;
-  logExercises = tpl.exercises.map(te => ({
-    id: uid(), name: te.name,
-    sets: Array.from({ length: te.sets || 3 }, () => blankSet()),
-    restAfter: ''
+function loadTpl(id){
+  const t=templates.find(x=>x.id===id); if(!t) return;
+  logExs=t.exercises.map(te=>({
+    id:uid(), name:te.name, rest:'',
+    sets:Array.from({length:te.sets||3},()=>blankSet())
   }));
-  setView('log');
-  renderExercises();
-  showToast(`Malen "${tpl.name}" er lasta inn!`);
+  gotoView('log');
+  renderExList();
+  toast(`Malen "${t.name}" er lasta inn!`);
 }
 
-function openNewTemplateModal() {
-  editingTemplateId = null;
-  document.getElementById('templateModalTitle').textContent = 'NY ØKTMAL';
-  document.getElementById('tplNameInput').value = '';
-  tplExercises = [{ id: uid(), name: '', sets: 3 }];
-  renderTplExList();
-  document.getElementById('templateModal').classList.add('open');
+function openTplModal(id){
+  editTplId=id;
+  const t=id?templates.find(x=>x.id===id):null;
+  document.getElementById('tplModalTitle').textContent = t?'REDIGER MAL':'NY ØKTMAL';
+  document.getElementById('tplName').value = t?t.name:'';
+  tplRows = t ? t.exercises.map(e=>({id:uid(),name:e.name,sets:e.sets})) : [{id:uid(),name:'',sets:3}];
+  renderTplRows();
+  document.getElementById('tplModal').classList.add('open');
 }
 
-function editTemplate(id) {
-  const tpl = templates.find(t => t.id === id);
-  if (!tpl) return;
-  editingTemplateId = id;
-  document.getElementById('templateModalTitle').textContent = 'REDIGER MAL';
-  document.getElementById('tplNameInput').value = tpl.name;
-  tplExercises = tpl.exercises.map(e => ({ id: uid(), name: e.name, sets: e.sets }));
-  renderTplExList();
-  document.getElementById('templateModal').classList.add('open');
+function closeTplModal(){
+  document.getElementById('tplModal').classList.remove('open');
 }
 
-function closeTemplateModal() {
-  document.getElementById('templateModal').classList.remove('open');
+function addTplExRow(){
+  tplRows.push({id:uid(),name:'',sets:3});
+  renderTplRows();
 }
 
-function addTplEx() {
-  tplExercises.push({ id: uid(), name: '', sets: 3 });
-  renderTplExList();
+function removeTplRow(id){
+  tplRows=tplRows.filter(r=>r.id!==id);
+  renderTplRows();
 }
 
-function removeTplEx(id) {
-  tplExercises = tplExercises.filter(e => e.id !== id);
-  renderTplExList();
-}
+function setTplRowName(id,val){ const r=tplRows.find(x=>x.id===id); if(r) r.name=val; }
+function setTplRowSets(id,val){ const r=tplRows.find(x=>x.id===id); if(r) r.sets=parseInt(val)||1; }
 
-function updateTplEx(id, field, val) {
-  const ex = tplExercises.find(e => e.id === id);
-  if (ex) ex[field] = field === 'sets' ? parseInt(val)||1 : val;
-}
-
-function renderTplExList() {
-  document.getElementById('tplExList').innerHTML = tplExercises.map((ex, i) => `
-    <div class="tpl-editor">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
-        <span style="font-size:0.72rem;color:var(--muted);letter-spacing:0.12em;font-weight:700">ØVING ${i+1}</span>
-        ${tplExercises.length > 1 ? `<button class="btn-danger" style="padding:0.15rem 0.4rem" onclick="removeTplEx('${ex.id}')">SLETT</button>` : ''}
+function renderTplRows(){
+  document.getElementById('tplExItems').innerHTML=tplRows.map((r,i)=>`
+    <div class="tpl-ex-row">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem">
+        <span class="sm-label" style="margin:0">ØVING ${i+1}</span>
+        ${tplRows.length>1?`<button class="btn btn-danger" style="padding:0.18rem 0.5rem" onclick="removeTplRow('${r.id}')">SLETT</button>`:''}
       </div>
-      <div class="tpl-ex-editor">
-        <select onchange="updateTplEx('${ex.id}','name',this.value)">
-          <option value="">— Vel øving —</option>
-          ${exerciseLib.map(n => `<option value="${n}" ${ex.name===n?'selected':''}>${n}</option>`).join('')}
-        </select>
-        <input type="number" class="tpl-sets-input" inputmode="numeric" placeholder="sett" value="${ex.sets}" min="1" max="20" onchange="updateTplEx('${ex.id}','sets',this.value)">
-        <span style="font-size:0.78rem;color:var(--muted);white-space:nowrap">sett</span>
+      <div class="tpl-ex-grid">
+        <select onchange="setTplRowName('${r.id}',this.value)">${exOptions(r.name)}</select>
+        <input type="number" class="tpl-sets-inp" inputmode="numeric" placeholder="sett" value="${r.sets}" min="1" max="20"
+          onchange="setTplRowSets('${r.id}',this.value)">
+        <span style="font-size:0.82rem;color:var(--muted);white-space:nowrap">sett</span>
       </div>
     </div>`).join('');
 }
 
-function saveTemplate() {
-  const name = document.getElementById('tplNameInput').value.trim();
-  if (!name) { showToast('Gi malen eit namn', 'var(--red)'); return; }
-  const exercises = tplExercises.filter(e => e.name);
-  if (!exercises.length) { showToast('Legg til minst éi øving', 'var(--red)'); return; }
-  if (editingTemplateId) {
-    templates = templates.map(t => t.id === editingTemplateId ? { ...t, name, exercises } : t);
+function saveTpl(){
+  const name=document.getElementById('tplName').value.trim();
+  if(!name){ toast('Gi malen eit namn!',true); return; }
+  const exercises=tplRows.filter(r=>r.name);
+  if(!exercises.length){ toast('Legg til minst éi øving!',true); return; }
+
+  if(editTplId){
+    templates=templates.map(t=>t.id===editTplId?{...t,name,exercises}:t);
   } else {
-    templates.push({ id: uid(), name, exercises });
+    templates.push({id:uid(),name,exercises});
   }
-  saveLS('templates', templates);
-  closeTemplateModal();
+  saveAll();
+  closeTplModal();
   renderTemplates();
-  saveToServer();
-  showToast(editingTemplateId ? 'Mal oppdatert!' : 'Mal lagra!');
+  pushToServer();
+  toast(editTplId?'Mal oppdatert!':'Mal lagra!');
 }
 
-// ─── Progress charts ──────────────────────────────────────────────────────────
-function renderProgressSelect() {
-  const names = [...new Set(sessions.flatMap(s => s.exercises.map(e => e.name)))];
-  const sel = document.getElementById('progressExSelect');
-  sel.innerHTML = '<option value="">—</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
-  if (names[0]) { sel.value = names[0]; renderProgressCharts(); }
+// ══════════════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════════════
+function renderProgSelect(){
+  const names=[...new Set(sessions.flatMap(s=>s.exercises.map(e=>e.name)))];
+  const sel=document.getElementById('progSel');
+  sel.innerHTML='<option value="">—</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  if(names[0]){ sel.value=names[0]; drawCharts(); }
 }
 
-function renderProgressCharts() {
-  const name = document.getElementById('progressExSelect').value;
-  if (!name) return;
-  const data = sessions.slice().reverse()
-    .filter(s => s.exercises.some(e => e.name === name))
-    .map(s => {
-      const ex = s.exercises.find(e => e.name === name);
-      const maxW = Math.max(...ex.sets.map(st => parseFloat(st.weight)||0));
-      const vol = ex.sets.reduce((a,st) => a+(parseFloat(st.weight)||0)*(parseInt(st.reps)||0), 0);
-      return { label: fmtDate(s.date), maxW, vol };
+function drawCharts(){
+  const name=document.getElementById('progSel').value; if(!name) return;
+  const data=sessions.slice().reverse()
+    .filter(s=>s.exercises.some(e=>e.name===name))
+    .map(s=>{
+      const ex=s.exercises.find(e=>e.name===name);
+      const maxKg=Math.max(0,...ex.sets.map(st=>parseFloat(st.kg)||0));
+      const vol=ex.sets.reduce((a,st)=>a+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0);
+      return {label:fmtDate(s.date),maxKg,vol};
     });
 
-  const chartCfg = (label, dataKey, color) => ({
-    type: 'line',
-    data: {
-      labels: data.map(d => d.label),
-      datasets: [{ label, data: data.map(d => d[dataKey]), borderColor: color, backgroundColor: color+'22', tension: 0.3, pointRadius: 4, pointBackgroundColor: color, fill: true }]
+  const cfg=(label,key,color)=>({
+    type:'line',
+    data:{
+      labels:data.map(d=>d.label),
+      datasets:[{
+        label, data:data.map(d=>d[key]),
+        borderColor:color, backgroundColor:color+'22',
+        tension:0.3, pointRadius:4, pointBackgroundColor:color, fill:true
+      }]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#2d7a5a', font: { size: 9 } }, grid: { color: '#b0d4c8' } },
-        y: { ticks: { color: '#2d7a5a', font: { size: 9 } }, grid: { color: '#b0d4c8' } }
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#2d7a58',font:{size:10}},grid:{color:'#9ecfbb'}},
+        y:{ticks:{color:'#2d7a58',font:{size:10}},grid:{color:'#9ecfbb'}}
       }
     }
   });
 
-  if (weightChart) weightChart.destroy();
-  if (volumeChart) volumeChart.destroy();
-  const wCtx = document.getElementById('chartWeight').getContext('2d');
-  const vCtx = document.getElementById('chartVolume').getContext('2d');
-  Chart.defaults.color = '#0d2b20';
-  weightChart = new Chart(wCtx, chartCfg('Maks kg', 'maxW', '#0e7a4a'));
-  volumeChart = new Chart(vCtx, chartCfg('Volum', 'vol', '#1a6faa'));
+  if(chartW) chartW.destroy();
+  if(chartV) chartV.destroy();
+  Chart.defaults.color='#2d7a58';
+  chartW=new Chart(document.getElementById('cW').getContext('2d'),cfg('Maks kg','maxKg','#0e7a4a'));
+  chartV=new Chart(document.getElementById('cV').getContext('2d'),cfg('Volum','vol','#1a6faa'));
 }
 
-// ─── Exercise library ─────────────────────────────────────────────────────────
-function addToLib() {
-  const input = document.getElementById('newExInput');
-  const name = input.value.trim();
-  if (!name || exerciseLib.includes(name)) { showToast('Øving finst allereie eller er tom', 'var(--red)'); return; }
-  exerciseLib.push(name);
-  saveLS('exerciseLib', exerciseLib);
-  input.value = '';
-  renderLibList();
-  saveToServer();
-  showToast(`"${name}" lagt til!`);
+// ══════════════════════════════════════════════════════════
+// EXERCISE & WARMUP LIBRARY
+// ══════════════════════════════════════════════════════════
+function addExLib(){
+  const inp=document.getElementById('newExInp');
+  const name=inp.value.trim();
+  if(!name||exLib.includes(name)){ toast('Øving finst allereie eller er tom!',true); return; }
+  exLib.push(name); saveAll(); pushToServer();
+  inp.value=''; renderLibs(); toast(`"${name}" lagt til!`);
 }
 
-function removeFromLib(name) {
-  exerciseLib = exerciseLib.filter(e => e !== name);
-  saveLS('exerciseLib', exerciseLib);
-  renderLibList();
-  saveToServer();
+function removeExLib(name){
+  exLib=exLib.filter(e=>e!==name); saveAll(); pushToServer(); renderLibs();
 }
 
-function renderLibList() {
-  document.getElementById('exerciseLibList').innerHTML = exerciseLib.map(name => `
+function addWuLib(){
+  const inp=document.getElementById('newWuInp');
+  const name=inp.value.trim();
+  if(!name||wuLib.includes(name)){ toast('Type finst allereie eller er tom!',true); return; }
+  wuLib.push(name); saveAll(); pushToServer();
+  inp.value=''; renderLibs(); refreshWuSelect(); toast(`"${name}" lagt til!`);
+}
+
+function removeWuLib(name){
+  wuLib=wuLib.filter(e=>e!==name); saveAll(); pushToServer();
+  renderLibs(); refreshWuSelect();
+}
+
+function renderLibs(){
+  document.getElementById('exLibList').innerHTML = exLib.map(name=>`
     <div class="lib-row">
-      <span>${name}</span>
-      <div style="display:flex;align-items:center;gap:0.5rem">
-        ${DEFAULT_EXERCISES.includes(name) ? '<span class="lib-tag">STANDARD</span>' : ''}
-        <button class="btn-danger" style="padding:0.18rem 0.45rem;font-size:0.48rem" onclick="removeFromLib('${name.replace(/'/g,"\\'")}')">SLETT</button>
+      <span>${esc(name)}</span>
+      <div style="display:flex;align-items:center;gap:0.6rem">
+        ${DEF_EXERCISES.includes(name)?'<span class="lib-tag">STANDARD</span>':''}
+        <button class="btn btn-danger" onclick="removeExLib('${esc(name)}')" style="padding:0.2rem 0.55rem;font-size:0.68rem">SLETT</button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('wuLibList').innerHTML = wuLib.map(name=>`
+    <div class="lib-row">
+      <span>${esc(name)}</span>
+      <div style="display:flex;align-items:center;gap:0.6rem">
+        ${DEF_WARMUP.includes(name)?'<span class="lib-tag">STANDARD</span>':''}
+        <button class="btn btn-danger" onclick="removeWuLib('${esc(name)}')" style="padding:0.2rem 0.55rem;font-size:0.68rem">SLETT</button>
       </div>
     </div>`).join('');
 }
 
-// ─── Google Sheets sync ───────────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwxh2A9EXAHMdIALgZ9PBSWxN5Az7jEbqi7PmozjEXa8pTbQ54Z6Y3rvfwzFJ60uljetg/exec';
-
-async function saveToServer() {
-  const payload = { sessions, exerciseLib, templates, savedAt: new Date().toISOString() };
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    setSyncStatus('saved');
-  } catch (err) {
-    console.error('Save failed:', err);
-    setSyncStatus('error');
-  }
-}
-
-async function loadFromServer() {
-  setSyncStatus('syncing');
-  try {
-    const res = await fetch(API_URL + '?t=' + Date.now());
-    const text = await res.text();
-    const data = JSON.parse(text);
-    if (data && data.sessions) {
-      sessions = data.sessions;
-      exerciseLib = data.exerciseLib || exerciseLib;
-      templates = data.templates || templates;
-      saveLS('sessions', sessions);
-      saveLS('exerciseLib', exerciseLib);
-      saveLS('templates', templates);
-      document.getElementById('sessionCount').textContent = sessions.length + ' ØKTER';
-      renderExercises();
-      showToast('Synkronisert! ' + sessions.length + ' økter lasta inn.');
-      setSyncStatus('saved');
-    } else {
-      showToast('Ingen data på server enno – lagrar lokalt.');
-      setSyncStatus('idle');
-    }
-  } catch (err) {
-    console.error('Load failed:', err);
-    showToast('Klarte ikkje hente data. Sjekk internett.', 'var(--red)');
-    setSyncStatus('error');
-  }
-}
-
-function setSyncStatus(status) {
-  const btn = document.getElementById('syncBtn');
-  if (!btn) return;
-  const labels = { idle: '☁ SYNK', syncing: '⟳ HENTAR...', saved: '✓ LAGRA', error: '✗ FEIL' };
-  btn.textContent = labels[status] || '☁ SYNK';
-  if (status === 'error') setTimeout(() => setSyncStatus('idle'), 4000);
-  if (status === 'saved') setTimeout(() => setSyncStatus('idle'), 3000);
-}
-
-// Eksport som backup
-function exportData() {
-  const payload = { sessions, exerciseLib, templates, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'løft-backup-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Backup lasta ned!');
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+function init(){
+  document.getElementById('logDate').textContent = fmtDate(today()).toUpperCase();
+  document.getElementById('hCount').textContent  = sessions.length + ' ØKTER';
+  logExs = [blankEx()];
+  renderExList();
+  refreshWuSelect();
+  // Auto-sync on load
+  syncNow();
 }
 
 init();
-// Last inn data frå server ved oppstart
-loadFromServer();
+</script>
+</body>
+</html>
