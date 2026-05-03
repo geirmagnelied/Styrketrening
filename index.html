@@ -1503,10 +1503,10 @@ function showLoadingOverlay(msg){
     el=document.createElement('div');
     el.id='loadingOverlay';
     el.style.cssText='position:fixed;inset:0;background:rgba(12,36,25,0.92);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;';
-    el.innerHTML=\`<div style="font-family:DM Serif Display,serif;font-size:2.5rem;color:#fff">LØFT</div>
+    el.innerHTML=`<div style="font-family:DM Serif Display,serif;font-size:2.5rem;color:#fff">LØFT</div>
       <div id="loadingMsg" style="font-size:.85rem;color:#6aaf90;letter-spacing:.15em;text-align:center;padding:0 2rem"></div>
       <div style="width:48px;height:48px;border:3px solid #0e7a4a;border-top-color:#6ef7a0;border-radius:50%;animation:spin .8s linear infinite"></div>
-      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>\`;
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
     document.body.appendChild(el);
   }
   document.getElementById('loadingMsg').textContent=msg;
