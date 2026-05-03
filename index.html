@@ -556,7 +556,7 @@ input[type=date]{color:var(--text)}
     </div>
     <div class="sm-label" style="margin-bottom:.5rem">DAGAR I VEKA</div>
     <div id="planDayRows"></div>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="addPlanDay()">+ LEGG TIL DAG</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="addPlanDay()">+ LEGG TIL NY DAG</button>
     <div class="sm-label">NOTAT FOR VEKA (valgfritt)</div>
     <textarea id="planNote" placeholder="t.d. fokus, intensitet, mål..." rows="2" style="margin-bottom:1rem"></textarea>
     <button class="btn btn-primary" onclick="savePlan()">LAGRE VEKEPLAN</button>
@@ -1555,11 +1555,16 @@ function renderPlan(){
         <div class="week-banner-label">DENNE VEKA – VEK ${curWeek}</div>
         <div class="week-banner-title">${esc(curPlan.note)||'Treningsplan'}</div>
         <div class="week-banner-days">
-          ${(curPlan.days||[]).map(d=>`
-            <div class="week-banner-day">
-              <span style="opacity:.7;min-width:4rem">${esc(d.day)}</span>
-              <span>${d.templateId==='rest'?'Kviledag':esc(d.templateLabel||d.templateId)}</span>
-            </div>`).join('')}
+          ${(()=>{
+            const grouped={};
+            DAYS.forEach(d=>grouped[d]=[]);
+            (curPlan.days||[]).forEach(d=>{ if(!grouped[d.day])grouped[d.day]=[]; grouped[d.day].push(d); });
+            return DAYS.filter(d=>grouped[d].length>0).map(day=>`
+              <div class="week-banner-day">
+                <span style="opacity:.7;min-width:4rem">${day.substring(0,3)}</span>
+                <span>${grouped[day].map(d=>d.templateId==='rest'?'Kviledag':esc(d.templateLabel||d.templateId)).join(' + ')}</span>
+              </div>`).join('');
+          })()}
         </div>
       </div>`;
   } else {
@@ -1595,13 +1600,23 @@ function renderPlan(){
         </div>
       </div>
       <div class="plan-body" id="pb-${p.id}">
-        ${(p.days||[]).map(d=>`
-          <div class="plan-day">
-            <span class="plan-day-name">${esc(d.day).substring(0,3).toUpperCase()}</span>
-            ${d.templateId==='rest'
-              ? '<span class="plan-day-rest">Kviledag</span>'
-              : `<span class="plan-day-tpl">${esc(d.templateLabel||d.templateId)}</span>`}
-          </div>`).join('')}
+        ${(()=>{
+          // Group by day
+          const grouped={};
+          DAYS.forEach(d=>grouped[d]=[]);
+          (p.days||[]).forEach(d=>{ if(!grouped[d.day])grouped[d.day]=[]; grouped[d.day].push(d); });
+          return DAYS.filter(d=>grouped[d].length>0).map(day=>`
+            <div class="plan-day">
+              <span class="plan-day-name">${day.substring(0,3).toUpperCase()}</span>
+              <div style="display:flex;flex-direction:column;gap:.18rem">
+                ${grouped[day].map(d=>
+                  d.templateId==='rest'
+                    ? '<span class="plan-day-rest">Kviledag</span>'
+                    : `<span class="plan-day-tpl">${esc(d.templateLabel||d.templateId)}</span>`
+                ).join('')}
+              </div>
+            </div>`).join('');
+        })()}
         ${p.note?`<div class="plan-note">${esc(p.note)}</div>`:''}
       </div>
     </div>`;
@@ -1621,18 +1636,35 @@ function openPlanModal(id){
   document.getElementById('planWeekFrom').value=p?p.week:curWeek;
   document.getElementById('planYear').value=p?p.year:curYear;
   document.getElementById('planNote').value=p?p.note||'':'';
-  planDayRows=p&&p.days?p.days.map(d=>({...d,_id:uid()})):
-    DAYS.map(day=>({_id:uid(),day,templateId:'rest',templateLabel:'Kviledag'}));
+  if(p&&p.days){
+    planDayRows=p.days.map(d=>({...d,_id:uid()}));
+  } else {
+    // Default: one rest slot per day
+    planDayRows=DAYS.map(day=>({_id:uid(),day,templateId:'rest',templateLabel:'Kviledag'}));
+  }
   renderPlanDayRows();
   document.getElementById('planModal').classList.add('open');
 }
 
 function addPlanDay(){
-  planDayRows.push({_id:uid(),day:'Måndag',templateId:'rest',templateLabel:'Kviledag'});
+  // Find first day that has no entries yet, else Måndag
+  const usedDays=planDayRows.map(r=>r.day);
+  const nextDay=DAYS.find(d=>!usedDays.includes(d))||'Måndag';
+  planDayRows.push({_id:uid(),day:nextDay,templateId:'rest',templateLabel:'Kviledag'});
+  renderPlanDayRows();
+}
+
+function addPlanDaySession(day){
+  planDayRows.push({_id:uid(),day,templateId:'rest',templateLabel:'Kviledag'});
   renderPlanDayRows();
 }
 
 function removePlanDay(id){
+  planDayRows=planDayRows.filter(r=>r._id!==id);
+  renderPlanDayRows();
+}
+
+function removePlanEntry(id){
   planDayRows=planDayRows.filter(r=>r._id!==id);
   renderPlanDayRows();
 }
@@ -1650,18 +1682,31 @@ function setPlanDayTemplate(id,val){
 
 function renderPlanDayRows(){
   const tpls=allTemplates();
-  document.getElementById('planDayRows').innerHTML=planDayRows.map(r=>`
-    <div style="background:var(--surface2);border:2px solid var(--border);border-radius:5px;padding:.8rem;margin-bottom:.5rem">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-        <select style="width:auto;font-size:.85rem;font-weight:700;border:none;background:none;color:var(--accent);padding:0;background-image:none"
-          onchange="setPlanDayName('${r._id}',this.value)">
-          ${DAYS.map(d=>`<option value="${d}" ${r.day===d?'selected':''}>${d}</option>`).join('')}
-        </select>
-        <button class="btn btn-danger" style="padding:.18rem .5rem;font-size:.62rem" onclick="removePlanDay('${r._id}')">SLETT</button>
+
+  // Group rows by day for display
+  const grouped={};
+  DAYS.forEach(d=>grouped[d]=[]);
+  planDayRows.forEach(r=>{
+    if(!grouped[r.day]) grouped[r.day]=[];
+    grouped[r.day].push(r);
+  });
+
+  // Only show days that have at least one entry
+  const activeDays=DAYS.filter(d=>grouped[d].length>0);
+
+  document.getElementById('planDayRows').innerHTML=activeDays.map(day=>`
+    <div style="background:var(--surface2);border:2px solid var(--border);border-radius:6px;margin-bottom:.6rem;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .85rem;background:var(--surface);border-bottom:1px solid var(--border)">
+        <span style="font-size:.82rem;font-weight:700;color:var(--accent);letter-spacing:.08em">${day.toUpperCase()}</span>
+        <button class="btn btn-ghost" style="font-size:.62rem;padding:.2rem .6rem" onclick="addPlanDaySession('${day}')">+ ØKT</button>
       </div>
-      <select onchange="setPlanDayTemplate('${r._id}',this.value)">
-        ${tpls.map(t=>`<option value="${t.id}" ${r.templateId===t.id?'selected':''}>${t.label}</option>`).join('')}
-      </select>
+      ${grouped[day].map(r=>`
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.5rem .85rem;border-bottom:1px solid var(--border)">
+          <select style="flex:1" onchange="setPlanDayTemplate('${r._id}',this.value)">
+            ${tpls.map(t=>`<option value="${t.id}" ${r.templateId===t.id?'selected':''}>${t.label}</option>`).join('')}
+          </select>
+          <button class="btn btn-danger" style="padding:.2rem .5rem;font-size:.65rem;flex-shrink:0" onclick="removePlanEntry('${r._id}')">✕</button>
+        </div>`).join('')}
     </div>`).join('');
 }
 
