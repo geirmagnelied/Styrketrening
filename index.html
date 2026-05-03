@@ -367,21 +367,21 @@ input[type=date]{color:var(--text)}
         </div>
       </div>
 
-      <!-- Kondisjon & oppvarming -->
+      <!-- Kondisjon -->
       <div class="lib-subsection">
-        <div class="lib-subsection-hdr" onclick="toggleLibSection('cardioSection')">
-          <span>🏃 Kondisjon &amp; Oppvarming</span>
+        <div class="lib-subsection-hdr" onclick="toggleLibSection('libCardioSection')">
+          <span>🏃 Kondisjon</span>
           <div style="display:flex;align-items:center;gap:.6rem">
-            <span class="lib-count" id="cardioSectionCount"></span>
-            <span class="lib-arrow" id="cardioSectionArrow">▶</span>
+            <span class="lib-count" id="libCardioSectionCount"></span>
+            <span class="lib-arrow" id="libCardioSectionArrow">▶</span>
           </div>
         </div>
-        <div id="cardioSection" style="display:none;padding:.75rem 1rem 1rem">
+        <div id="libCardioSection" style="display:none;padding:.75rem 1rem 1rem">
           <div class="lib-add-row">
             <input type="text" id="newCardioInp" placeholder="Ny aktivitet..." onkeydown="if(event.key==='Enter')addCardioLib()">
             <button class="btn btn-orange" onclick="addCardioLib()">+ LEGG TIL</button>
           </div>
-          <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">Aktivitetar her er tilgjengelege i kondisjonstrening og oppvarming.</p>
+          <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">Aktivitetar her er tilgjengelege i kondisjonstrening og i oppvarmingsvalet.</p>
           <div id="cardioLibList"></div>
         </div>
       </div>
@@ -470,44 +470,6 @@ input[type=date]{color:var(--text)}
     <div class="chart-box"><canvas id="cV"></canvas></div>
   </div>
 </div>
-</div>
-
-<!-- ════════════ EXERCISES VIEW ════════════ -->
-<div id="view-exercises" class="view">
-  <div class="date-line">ØVINGSBIBLIOTEK</div>
-
-  <!-- Styrkeøvingar -->
-  <div class="lib-section">
-    <button class="lib-section-toggle" onclick="toggleLibSection('exSection')">
-      <span>💪 STYRKEØVINGAR</span>
-      <span id="exSectionCount" class="lib-count"></span>
-      <span id="exSectionArrow" class="lib-arrow">▶</span>
-    </button>
-    <div id="exSection" class="lib-section-body" style="display:none">
-      <div class="row2" style="margin:.75rem 0 .75rem">
-        <input type="text" id="newExInp" placeholder="Ny styrkeøving..." onkeydown="if(event.key==='Enter')addExLib()">
-        <button class="btn btn-outline" onclick="addExLib()">+ LEGG TIL</button>
-      </div>
-      <div class="lib-list" id="exLibList"></div>
-    </div>
-  </div>
-
-  <!-- Kondisjon og oppvarming saman -->
-  <div class="lib-section">
-    <button class="lib-section-toggle" onclick="toggleLibSection('cardioSection')">
-      <span>🏃 KONDISJON &amp; OPPVARMING</span>
-      <span id="cardioSectionCount" class="lib-count"></span>
-      <span id="cardioSectionArrow" class="lib-arrow">▶</span>
-    </button>
-    <div id="cardioSection" class="lib-section-body" style="display:none">
-      <div class="row2" style="margin:.75rem 0 .5rem">
-        <input type="text" id="newCardioInp" placeholder="Ny aktivitet (kondisjon/oppvarming)..." onkeydown="if(event.key==='Enter')addCardioLib()">
-        <button class="btn btn-orange" onclick="addCardioLib()">+ LEGG TIL</button>
-      </div>
-      <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">Aktivitetar her blir tilgjengelege i både kondisjonstrening og oppvarmingsvalet.</p>
-      <div class="lib-list" id="cardioLibList"></div>
-    </div>
-  </div>
 </div>
 
 </main>
@@ -703,9 +665,9 @@ async function syncNow(){
       const active=document.querySelector('.view.active');
       if(active){
         const id=active.id.replace('view-','');
-        if(id==='history')  renderHistory();
-        if(id==='templates'){renderStrTemplates();renderCardioTemplates();}
-        if(id==='exercises')renderLibs();
+        if(id==='history') renderHistory();
+        if(id==='plan')    renderPlan();
+        if(id==='okter')   {renderStrTemplates();renderCardioTemplates();renderLibs();}
       }
       toast('Synkronisert! '+sessions.length+' økter.');
       setSyncBtn('ok');
