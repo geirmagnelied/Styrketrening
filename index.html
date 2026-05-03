@@ -134,6 +134,28 @@ input[type=date]{color:var(--text)}
 .hist-set{font-size:.85rem;color:var(--text);display:flex;gap:1rem;margin-bottom:.12rem;flex-wrap:wrap}
 .hist-warm{font-size:.82rem;color:var(--blue);font-weight:600;margin-bottom:.5rem}
 .hist-note{font-size:.78rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:.4rem;margin-top:.3rem}
+.hist-group-btns{display:flex;gap:.3rem}
+.hist-grp-btn{font-family:inherit;font-size:.65rem;font-weight:700;letter-spacing:.12em;padding:.38rem .75rem;background:var(--surface);border:2px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;transition:all .15s}
+.hist-grp-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.hist-group-card{background:var(--surface);border:2px solid var(--border);border-radius:8px;margin-bottom:.85rem;overflow:hidden}
+.hist-group-head{padding:.9rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.hist-group-head:hover{background:var(--surface2)}
+.hist-group-label{font-size:.68rem;color:var(--muted);letter-spacing:.14em;font-weight:700;margin-bottom:.15rem}
+.hist-group-title{font-size:1rem;font-weight:700}
+.hist-group-body{display:none;border-top:2px solid var(--border);background:var(--surface2)}
+.hist-group-body.open{display:block}
+.hist-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:.5rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border)}
+.hist-stat-box{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:.6rem .75rem;text-align:center}
+.hist-stat-val{font-size:1.05rem;font-weight:700;color:var(--accent);letter-spacing:-.01em}
+.hist-stat-lbl{font-size:.58rem;color:var(--muted);letter-spacing:.1em;margin-top:.1rem}
+.hist-stat-box.orange .hist-stat-val{color:var(--orange)}
+.hist-sessions-list{padding:.75rem 1.1rem 1rem}
+.hist-mini-session{background:var(--surface);border:1.5px solid var(--border);border-radius:5px;padding:.6rem .85rem;margin-bottom:.45rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:background .15s}
+.hist-mini-session:hover{background:var(--surface2)}
+.hist-mini-left .date{font-size:.62rem;color:var(--muted);letter-spacing:.1em;font-weight:700}
+.hist-mini-left .names{font-size:.82rem;margin-top:.05rem}
+.hist-mini-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem}
+.hist-mini-vol{font-size:.65rem;color:var(--accent);font-weight:700}
 
 /* Templates */
 .tpl-card{background:var(--surface);border:2px solid var(--border);border-radius:6px;margin-bottom:.8rem;overflow:hidden}
@@ -170,6 +192,31 @@ input[type=date]{color:var(--text)}
 .edit-badge{display:inline-block;background:var(--orange);color:#fff;font-size:.62rem;letter-spacing:.1em;padding:.15rem .5rem;border-radius:3px;margin-left:.5rem;vertical-align:middle}
 
 .empty{text-align:center;color:var(--muted);padding:3.5rem 0;font-size:.85rem;letter-spacing:.15em}
+
+/* ── Økter view ── */
+.okter-section{border:2px solid var(--border);border-radius:8px;margin-bottom:.85rem;overflow:hidden;background:var(--surface)}
+.okter-section-hdr{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.1rem;cursor:pointer;background:var(--surface);transition:background .15s;user-select:none}
+.okter-section-hdr:hover{background:var(--surface2)}
+.okter-section-title{display:flex;align-items:center;gap:.65rem;font-size:.82rem;font-weight:700;letter-spacing:.1em;color:var(--text)}
+.okter-section-icon{font-size:1.1rem}
+.okter-section-arrow{font-size:.72rem;color:var(--muted);transition:transform .2s}
+.okter-section-arrow.open{transform:rotate(90deg)}
+.okter-section-body{border-top:2px solid var(--border);background:var(--surface2)}
+
+/* ── Library subsections ── */
+.lib-subsection{border-bottom:1px solid var(--border)}
+.lib-subsection:last-child{border-bottom:none}
+.lib-subsection-hdr{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--muted);transition:background .15s;user-select:none}
+.lib-subsection-hdr:hover{background:rgba(0,0,0,.03)}
+.lib-add-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+
+/* ── Template cards inside Økter ── */
+.tpl-inline-card{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;margin-bottom:.6rem;overflow:hidden;transition:box-shadow .15s}
+.tpl-inline-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tpl-inline-head{padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:.6rem}
+.tpl-inline-name{font-size:.9rem;font-weight:700;color:var(--text)}
+.tpl-inline-sub{font-size:.68rem;color:var(--muted);margin-top:.08rem}
+.tpl-inline-btns{display:flex;gap:.4rem;flex-shrink:0}
 .plan-card{background:var(--surface);border:2px solid var(--border);border-radius:6px;margin-bottom:.85rem;overflow:hidden}
 .plan-card.current-week{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,122,74,.15)}
 .plan-head{padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
@@ -221,10 +268,9 @@ input[type=date]{color:var(--text)}
 <nav>
   <button class="nb active" onclick="gotoView('log')">LOG</button>
   <button class="nb" onclick="gotoView('plan')">PLAN</button>
-  <button class="nb" onclick="gotoView('templates')">MALAR</button>
+  <button class="nb" onclick="gotoView('okter')">ØKTER</button>
   <button class="nb" onclick="gotoView('history')">HISTORIKK</button>
   <button class="nb" onclick="gotoView('progress')">PROGRESJON</button>
-  <button class="nb" onclick="gotoView('exercises')">ØVINGAR</button>
 </nav>
 
 <main>
@@ -286,36 +332,112 @@ input[type=date]{color:var(--text)}
   <button class="btn btn-ghost" id="cancelEditBtn" onclick="cancelEdit()" style="width:100%;margin-top:.6rem;display:none">AVBRYT REDIGERING</button>
 </div>
 
-<!-- ════════════ TEMPLATES VIEW ════════════ -->
-<div id="view-templates" class="view">
-  <div class="date-line">ØKTMALAR</div>
-  <div class="tab-btns">
-    <button class="tab-btn active" id="tplTabStrength" onclick="setTplTab('strength')">💪 STYRKE</button>
-    <button class="tab-btn" id="tplTabCardio" onclick="setTplTab('cardio')">🏃 KONDISJON</button>
-  </div>
-  <div id="tplStrengthSection">
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="openStrTplModal(null)">+ LAG NY STYRKEMAL</button>
-    <div id="tplStrList"></div>
-  </div>
-  <div id="tplCardioSection" style="display:none">
-    <button class="btn btn-orange" style="width:100%;margin-bottom:1rem" onclick="openCardioTplModal(null)">+ LAG NY KONDISJONMAL</button>
-    <div id="tplCardioList"></div>
-  </div>
-</div>
+<!-- ════════════ ØKTER VIEW ════════════ -->
+<div id="view-okter" class="view">
 
-<!-- ════════════ PLAN VIEW ════════════ -->
-<div id="view-plan" class="view">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
-    <div class="date-line" style="margin:0">TRENINGSPLAN</div>
-    <button class="btn btn-outline" onclick="openPlanModal(null)" style="font-size:.75rem">+ NY VEKE</button>
+  <!-- ── Øvingsbibliotek ── -->
+  <div class="okter-section">
+    <div class="okter-section-hdr" onclick="toggleOkterSection('libBlock')">
+      <div class="okter-section-title">
+        <span class="okter-section-icon">📚</span>
+        <span>ØVINGSBIBLIOTEK</span>
+      </div>
+      <span class="okter-section-arrow" id="libBlockArrow">▶</span>
+    </div>
+    <div id="libBlock" class="okter-section-body" style="display:none">
+
+      <!-- Styrkeøvingar -->
+      <div class="lib-subsection">
+        <div class="lib-subsection-hdr" onclick="toggleLibSection('exSection')">
+          <span>💪 Styrkeøvingar</span>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <span class="lib-count" id="exSectionCount"></span>
+            <span class="lib-arrow" id="exSectionArrow">▶</span>
+          </div>
+        </div>
+        <div id="exSection" style="display:none;padding:.75rem 1rem 1rem">
+          <div class="lib-add-row">
+            <input type="text" id="newExInp" placeholder="Ny styrkeøving..." onkeydown="if(event.key==='Enter')addExLib()">
+            <button class="btn btn-outline" onclick="addExLib()">+ LEGG TIL</button>
+          </div>
+          <div id="exLibList"></div>
+        </div>
+      </div>
+
+      <!-- Kondisjon & oppvarming -->
+      <div class="lib-subsection">
+        <div class="lib-subsection-hdr" onclick="toggleLibSection('cardioSection')">
+          <span>🏃 Kondisjon &amp; Oppvarming</span>
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <span class="lib-count" id="cardioSectionCount"></span>
+            <span class="lib-arrow" id="cardioSectionArrow">▶</span>
+          </div>
+        </div>
+        <div id="cardioSection" style="display:none;padding:.75rem 1rem 1rem">
+          <div class="lib-add-row">
+            <input type="text" id="newCardioInp" placeholder="Ny aktivitet..." onkeydown="if(event.key==='Enter')addCardioLib()">
+            <button class="btn btn-orange" onclick="addCardioLib()">+ LEGG TIL</button>
+          </div>
+          <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">Aktivitetar her er tilgjengelege i kondisjonstrening og oppvarming.</p>
+          <div id="cardioLibList"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <div id="currentWeekBanner"></div>
-  <div id="planList"></div>
+
+  <!-- ── Styrketemplatear ── -->
+  <div class="okter-section">
+    <div class="okter-section-hdr" onclick="toggleOkterSection('strTplBlock')">
+      <div class="okter-section-title">
+        <span class="okter-section-icon">💪</span>
+        <span>STYRKEØKTER</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <span class="lib-count" id="strTplCount"></span>
+        <span class="okter-section-arrow" id="strTplBlockArrow">▶</span>
+      </div>
+    </div>
+    <div id="strTplBlock" class="okter-section-body" style="display:none">
+      <div style="padding:.75rem 1rem">
+        <button class="btn btn-outline" style="width:100%;margin-bottom:.85rem" onclick="openStrTplModal(null)">+ LAG NY STYRKEMAL</button>
+      </div>
+      <div id="tplStrList" style="padding:0 1rem 1rem"></div>
+    </div>
+  </div>
+
+  <!-- ── Kondisjontemplatear ── -->
+  <div class="okter-section">
+    <div class="okter-section-hdr" onclick="toggleOkterSection('cardioTplBlock')">
+      <div class="okter-section-title">
+        <span class="okter-section-icon">🏃</span>
+        <span>KONDISJONSØKTER</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <span class="lib-count" id="cardioTplCount"></span>
+        <span class="okter-section-arrow" id="cardioTplBlockArrow">▶</span>
+      </div>
+    </div>
+    <div id="cardioTplBlock" class="okter-section-body" style="display:none">
+      <div style="padding:.75rem 1rem">
+        <button class="btn btn-orange" style="width:100%;margin-bottom:.85rem" onclick="openCardioTplModal(null)">+ LAG NY KONDISJONMAL</button>
+      </div>
+      <div id="tplCardioList" style="padding:0 1rem 1rem"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ════════════ HISTORY VIEW ════════════ -->
 <div id="view-history" class="view">
-  <div class="date-line">TRENINGSHISTORIKK</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
+    <div class="date-line" style="margin:0">TRENINGSHISTORIKK</div>
+    <div class="hist-group-btns">
+      <button class="hist-grp-btn active" id="grpWeek"  onclick="setHistGroup('week')">VEK</button>
+      <button class="hist-grp-btn" id="grpMonth" onclick="setHistGroup('month')">MND</button>
+      <button class="hist-grp-btn" id="grpYear"  onclick="setHistGroup('year')">ÅR</button>
+    </div>
+  </div>
   <div id="histList"></div>
 </div>
 
@@ -583,13 +705,12 @@ function gotoView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const labels={log:'LOG',plan:'PLAN',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'};
+  const labels={log:'LOG',plan:'PLAN',okter:'ØKTER',history:'HISTORIKK',progress:'PROGRESJON'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent.trim()===labels[name])b.classList.add('active');});
   if(name==='history')  renderHistory();
   if(name==='plan')     renderPlan();
-  if(name==='templates'){renderStrTemplates();renderCardioTemplates();}
+  if(name==='okter')    {renderStrTemplates();renderCardioTemplates();renderLibs();}
   if(name==='progress') renderProgSelect();
-  if(name==='exercises')renderLibs();
 }
 
 // ════════════════════════════════════════════════════════
@@ -921,67 +1042,168 @@ function makePDF(s){
 // ════════════════════════════════════════════════════════
 // HISTORY
 // ════════════════════════════════════════════════════════
+let histGroup = 'week';
+
+function setHistGroup(g){
+  histGroup=g;
+  ['week','month','year'].forEach(x=>{
+    const b=document.getElementById('grp'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(b) b.classList.toggle('active', x===g);
+  });
+  renderHistory();
+}
+
+function getGroupKey(dateStr){
+  const d=new Date(dateStr);
+  if(histGroup==='year')  return String(d.getFullYear());
+  if(histGroup==='month') return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  // week
+  const [wk,yr]=getISOWeek(d);
+  return yr+'-W'+String(wk).padStart(2,'0');
+}
+
+function getGroupLabel(key){
+  if(histGroup==='year') return key+' – ÅRSOPPSUMMERING';
+  if(histGroup==='month'){
+    const [y,m]=key.split('-');
+    const d=new Date(parseInt(y),parseInt(m)-1,1);
+    return d.toLocaleDateString('nb-NO',{month:'long',year:'numeric'}).toUpperCase();
+  }
+  // week
+  const [y,w]=key.split('-W');
+  return 'VEK '+parseInt(w)+', '+y+' · '+getWeekDateRange(parseInt(w),parseInt(y));
+}
+
+function computeStats(group){
+  const stats={};
+  // Strength volume per exercise
+  group.forEach(s=>{
+    (s.exercises||[]).filter(e=>e.name).forEach(ex=>{
+      const vol=ex.sets.reduce((a,st)=>a+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0);
+      const reps=ex.sets.reduce((a,st)=>a+(parseInt(st.reps)||0),0);
+      if(!stats[ex.name]) stats[ex.name]={vol:0,reps:0,type:'strength'};
+      stats[ex.name].vol+=vol;
+      stats[ex.name].reps+=reps;
+    });
+    // Cardio stats
+    (s.cardios||[]).filter(c=>c.name).forEach(c=>{
+      if(!stats[c.name]) stats[c.name]={km:0,min:0,type:'cardio'};
+      if(c.type==='steady'){
+        stats[c.name].km+=parseFloat(c.steady.km)||0;
+        stats[c.name].min+=parseFloat(c.steady.min)||0;
+      } else {
+        (c.intervals||[]).forEach(iv=>{
+          stats[c.name].km+=(parseFloat(iv.meter)||0)/1000;
+        });
+        if(c.totalKm) stats[c.name].km=parseFloat(c.totalKm)||stats[c.name].km;
+      }
+    });
+    // Warmup
+    if(s.warmup?.type){
+      const k='Oppvarming: '+s.warmup.type;
+      if(!stats[k]) stats[k]={km:0,min:0,type:'warmup'};
+      stats[k].km+=parseFloat(s.warmup.km)||0;
+      stats[k].min+=parseFloat(s.warmup.min)||0;
+    }
+  });
+  return stats;
+}
+
 function renderHistory(){
   const el=document.getElementById('histList');
   if(!sessions.length){el.innerHTML='<div class="empty">INGEN ØKTER ENDÅ</div>';return;}
-  el.innerHTML=sessions.map(s=>{
-    const vol=(s.exercises||[]).reduce((a,e)=>a+(e.sets||[]).reduce((b,st)=>b+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0),0);
-    const typeIcon={strength:'💪',cardio:'🏃',both:'⚡'}[s.sessionType]||'💪';
-    const names=[
-      ...(s.exercises||[]).filter(e=>e.name).map(e=>e.name),
-      ...(s.cardios||[]).filter(c=>c.name).map(c=>c.name)
-    ].join(', ');
+
+  // Group sessions
+  const groups={};
+  sessions.forEach(s=>{
+    const k=getGroupKey(s.date);
+    if(!groups[k]) groups[k]=[];
+    groups[k].push(s);
+  });
+
+  const sortedKeys=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+
+  el.innerHTML=sortedKeys.map(key=>{
+    const group=groups[key];
+    const stats=computeStats(group);
+    const totalVol=group.reduce((a,s)=>(s.exercises||[]).reduce((b,e)=>b+e.sets.reduce((c,st)=>c+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0),a),0);
+
+    // Build stat boxes
+    const statBoxes=[];
+    statBoxes.push(`<div class="hist-stat-box"><div class="hist-stat-val">${group.length}</div><div class="hist-stat-lbl">ØKTER</div></div>`);
+    if(totalVol>0) statBoxes.push(`<div class="hist-stat-box"><div class="hist-stat-val">${Math.round(totalVol).toLocaleString('nb-NO')}</div><div class="hist-stat-lbl">KG VOLUM</div></div>`);
+    Object.entries(stats).forEach(([name,s])=>{
+      if(s.type==='cardio'||s.type==='warmup'){
+        if(s.km>0) statBoxes.push(`<div class="hist-stat-box orange"><div class="hist-stat-val">${s.km.toFixed(1)}</div><div class="hist-stat-lbl">KM ${esc(name).toUpperCase().replace('OPPVARMING: ','')}</div></div>`);
+        if(s.min>0&&!s.km) statBoxes.push(`<div class="hist-stat-box orange"><div class="hist-stat-val">${Math.round(s.min)}</div><div class="hist-stat-lbl">MIN ${esc(name).toUpperCase()}</div></div>`);
+      } else {
+        if(s.reps>0) statBoxes.push(`<div class="hist-stat-box"><div class="hist-stat-val">${s.reps.toLocaleString('nb-NO')}</div><div class="hist-stat-lbl">REPS ${esc(name).toUpperCase()}</div></div>`);
+      }
+    });
+
     return `
-    <div class="hist-card">
-      <div class="hist-head" onclick="toggleHist('${s.id}')">
+    <div class="hist-group-card">
+      <div class="hist-group-head" onclick="toggleHistGroup('${key}')">
         <div>
-          <div class="hist-date">${typeIcon} ${fmtDate(s.date).toUpperCase()}</div>
-          <div class="hist-names">${esc(names)}</div>
-          ${vol?`<div class="hist-vol">${vol.toLocaleString('nb-NO')} KG VOLUM</div>`:''}
+          <div class="hist-group-label">${getGroupLabel(key)}</div>
+          <div class="hist-group-title">${group.length} økt${group.length!==1?'er':''} · ${group.reduce((a,s)=>(s.exercises||[]).filter(e=>e.name).reduce((b,e)=>b+e.name+' ',a),'').trim().split(' ').filter((v,i,a)=>a.indexOf(v)===i).slice(0,3).join(', ')}${Object.keys(stats).length>3?'…':''}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
-          <span style="font-size:.85rem;color:var(--muted)" id="htog-${s.id}">▼</span>
-          <div style="display:flex;gap:.4rem">
-            <button class="btn btn-ghost" style="font-size:.7rem;padding:.28rem .65rem"
-              onclick="event.stopPropagation();loadSessionForEdit('${s.id}')">✏ ENDRE</button>
-            <button class="btn btn-ghost" style="font-size:.7rem;padding:.28rem .65rem"
-              onclick="event.stopPropagation();makePDF(${JSON.stringify(s).replace(/"/g,'&quot;')})">PDF</button>
-          </div>
-        </div>
+        <span style="font-size:.85rem;color:var(--muted)" id="hgtog-${key}">▼</span>
       </div>
-      <div class="hist-body" id="hb-${s.id}">
-        ${s.warmup?.type?`<div class="hist-warm">🏃 ${esc(s.warmup.type)}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>`:''}
-        ${(s.cardios||[]).filter(c=>c.name).map(c=>`
-          <div class="hist-cardio-ex">${esc(c.name).toUpperCase()} — ${c.type==='interval'?'INTERVALL':'STEADY STATE'}</div>
-          ${c.type==='interval'
-            ? c.intervals.map((iv,j)=>`<div class="hist-set"><span>Int ${j+1}</span>${iv.min?`<span>${iv.min} min</span>`:''} ${iv.meter?`<span>${iv.meter} m</span>`:''} ${iv.pace?`<span>${iv.pace} min/km</span>`:''} ${iv.rest?`<span>Pause: ${iv.rest} min</span>`:''}</div>`).join('')
-            + (c.cooldown&&(c.cooldown.min||c.cooldown.meter)?`<div class="hist-set" style="color:var(--muted);font-style:italic"><span>Nedjogg:</span>${c.cooldown.min?`<span>${c.cooldown.min} min</span>`:''} ${c.cooldown.meter?`<span>${c.cooldown.meter} m</span>`:''} ${c.cooldown.pace?`<span>${c.cooldown.pace} min/km</span>`:''}</div>`:'')
-            + (()=>{ if(c.totalKm) return `<div class="hist-set" style="font-weight:700;color:var(--orange)"><span>Total:</span><span>${c.totalKm} km</span></div>`; const auto=((c.intervals||[]).reduce((a,iv)=>a+(parseFloat(iv.meter)||0),0)+(c.cooldown?parseFloat(c.cooldown.meter)||0:0))/1000; return auto>0?`<div class="hist-set" style="color:var(--orange)"><span>Total (auto):</span><span>≈ ${auto.toFixed(2)} km</span></div>`:''; })()
-            : `<div class="hist-set">${c.steady.min?`<span>${c.steady.min} min</span>`:''} ${c.steady.km?`<span>${c.steady.km} km</span>`:''} ${c.steady.intensity?`<span>${c.steady.intensity}</span>`:''}</div>`
-          }`).join('')}
-        ${(s.exercises||[]).filter(e=>e.name).map(ex=>`
-          <div class="hist-ex">${esc(ex.name).toUpperCase()}</div>
-          ${(ex.sets||[]).filter(st=>st.reps).map((st,j)=>`
-            <div class="hist-set">
-              <span>Sett ${j+1}</span>
-              ${st.kg?`<span>${esc(st.kg)} kg</span>`:''}
-              <span>${esc(st.reps)} reps</span>
-              ${st.rest?`<span>⏱ ${esc(st.rest)}s</span>`:''}
-            </div>`).join('')}
-          ${ex.rest?`<div style="font-size:.7rem;color:var(--muted);margin-bottom:.3rem">Pause etter: ${esc(ex.rest)}s</div>`:''}`).join('')}
-        ${s.note?`<div class="hist-note">${esc(s.note)}</div>`:''}
-        <div style="margin-top:.8rem">
-          <button class="btn btn-danger" onclick="deleteSession('${s.id}')">SLETT ØKT</button>
+      <div class="hist-group-body" id="hgb-${key}">
+        <div class="hist-stats">${statBoxes.join('')}</div>
+        <div class="hist-sessions-list">
+          ${group.map(s=>{
+            const vol=(s.exercises||[]).reduce((a,e)=>a+e.sets.reduce((b,st)=>b+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0),0);
+            const typeIcon={strength:'💪',cardio:'🏃',both:'⚡'}[s.sessionType]||'💪';
+            const names=[...(s.exercises||[]).filter(e=>e.name).map(e=>e.name),...(s.cardios||[]).filter(c=>c.name).map(c=>c.name)].join(', ');
+            return `<div class="hist-mini-session" onclick="expandSession('${s.id}')">
+              <div class="hist-mini-left">
+                <div class="date">${typeIcon} ${fmtDate(s.date).toUpperCase()}</div>
+                <div class="names">${esc(names)||'Økt'}</div>
+              </div>
+              <div class="hist-mini-right">
+                ${vol?`<span class="hist-mini-vol">${Math.round(vol).toLocaleString('nb-NO')} KG</span>`:''}
+                <div style="display:flex;gap:.3rem">
+                  <button class="btn btn-ghost" style="font-size:.65rem;padding:.22rem .55rem" onclick="event.stopPropagation();loadSessionForEdit('${s.id}')">✏</button>
+                  <button class="btn btn-ghost" style="font-size:.65rem;padding:.22rem .55rem" onclick="event.stopPropagation();makePDF(${JSON.stringify(s).replace(/"/g,'&quot;')})">PDF</button>
+                  <button class="btn btn-danger" style="font-size:.65rem;padding:.22rem .55rem" onclick="event.stopPropagation();deleteSession('${s.id}')">✕</button>
+                </div>
+              </div>
+            </div>
+            <div class="hist-body" id="hb-${s.id}" style="display:none;border:1.5px solid var(--border);border-radius:5px;margin-bottom:.45rem;padding:.75rem .85rem;background:var(--surface)">
+              ${s.warmup?.type?`<div class="hist-warm">🏃 ${esc(s.warmup.type)}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>`:''}
+              ${(s.cardios||[]).filter(c=>c.name).map(c=>`
+                <div class="hist-cardio-ex">${esc(c.name).toUpperCase()} — ${c.type==='interval'?'INTERVALL':'STEADY STATE'}</div>
+                ${c.type==='interval'
+                  ? c.intervals.map((iv,j)=>`<div class="hist-set"><span>Int ${j+1}</span>${iv.min?`<span>${iv.min}</span>`:''} ${iv.meter?`<span>${iv.meter} m</span>`:''} ${iv.pace?`<span>${iv.pace} min/km</span>`:''} ${iv.rest?`<span>Pause: ${iv.rest}</span>`:''}</div>`).join('')
+                  : `<div class="hist-set">${c.steady.min?`<span>${c.steady.min} min</span>`:''} ${c.steady.km?`<span>${c.steady.km} km</span>`:''} ${c.steady.intensity?`<span>${c.steady.intensity}</span>`:''}</div>`}
+                ${(c.cooldown&&(c.cooldown.min||c.cooldown.meter))?`<div class="hist-set" style="color:var(--muted);font-style:italic"><span>Nedjogg:</span>${c.cooldown.min?`<span>${c.cooldown.min}</span>`:''} ${c.cooldown.meter?`<span>${c.cooldown.meter} m</span>`:''}</div>`:''}`).join('')}
+              ${(s.exercises||[]).filter(e=>e.name).map(ex=>`
+                <div class="hist-ex">${esc(ex.name).toUpperCase()}</div>
+                ${(ex.sets||[]).filter(st=>st.reps).map((st,j)=>`
+                  <div class="hist-set"><span>Sett ${j+1}</span>${st.kg?`<span>${esc(st.kg)} kg</span>`:''}<span>${esc(st.reps)} reps</span>${st.rest?`<span>⏱${esc(st.rest)}s</span>`:''}</div>`).join('')}`).join('')}
+              ${s.note?`<div class="hist-note">${esc(s.note)}</div>`:''}
+            </div>`;
+          }).join('')}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleHist(id){
-  const b=document.getElementById('hb-'+id),t=document.getElementById('htog-'+id);
+function toggleHistGroup(key){
+  const b=document.getElementById('hgb-'+key),t=document.getElementById('hgtog-'+key);
   const open=b.classList.toggle('open'); t.textContent=open?'▲':'▼';
 }
+
+function expandSession(id){
+  const el=document.getElementById('hb-'+id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+
+
 
 function deleteSession(id){
   sessions=sessions.filter(s=>s.id!==id); saveAll();
@@ -992,27 +1214,26 @@ function deleteSession(id){
 // ════════════════════════════════════════════════════════
 // TEMPLATE TABS
 // ════════════════════════════════════════════════════════
-function setTplTab(tab){
-  document.getElementById('tplStrengthSection').style.display = tab==='strength'?'block':'none';
-  document.getElementById('tplCardioSection').style.display   = tab==='cardio'?'block':'none';
-  document.getElementById('tplTabStrength').className = 'tab-btn'+(tab==='strength'?' active':'');
-  document.getElementById('tplTabCardio').className   = 'tab-btn'+(tab==='cardio'?' active-orange':'');
-}
+// setTplTab removed – merged into Økter view
 
 // ════════════════════════════════════════════════════════
 // STRENGTH TEMPLATES
 // ════════════════════════════════════════════════════════
 function renderStrTemplates(){
   const el=document.getElementById('tplStrList');
-  if(!strTemplates.length){el.innerHTML='<div class="empty">INGEN STYRKETEMPLATEAR</div>';return;}
+  const cnt=document.getElementById('strTplCount');
+  if(cnt) cnt.textContent=strTemplates.length+' malar';
+  if(!strTemplates.length){el.innerHTML='<div class="empty" style="padding:1.5rem 0">Ingen styrketemplatear endå</div>';return;}
   el.innerHTML=strTemplates.map(t=>`
-    <div class="tpl-card">
-      <div class="tpl-head">
-        <div><div class="tpl-name">💪 ${esc(t.name)}</div>
-          <div class="tpl-sub">${t.exercises.length} øvingar · ${t.exercises.map(e=>esc(e.name)).join(', ')}</div></div>
-        <div class="tpl-btns">
-          <button class="btn btn-ghost" onclick="openStrTplModal('${t.id}')">REDIGER</button>
-          <button class="btn btn-outline" onclick="loadStrTpl('${t.id}')">START</button>
+    <div class="tpl-inline-card">
+      <div class="tpl-inline-head">
+        <div>
+          <div class="tpl-inline-name">${esc(t.name)}</div>
+          <div class="tpl-inline-sub">${t.exercises.length} øvingar · ${t.exercises.map(e=>esc(e.name)).join(', ')}</div>
+        </div>
+        <div class="tpl-inline-btns">
+          <button class="btn btn-ghost" onclick="openStrTplModal('${t.id}')">✏</button>
+          <button class="btn btn-outline" onclick="loadStrTpl('${t.id}')">START →</button>
         </div>
       </div>
     </div>`).join('');
@@ -1073,15 +1294,19 @@ function saveStrTpl(){
 // ════════════════════════════════════════════════════════
 function renderCardioTemplates(){
   const el=document.getElementById('tplCardioList');
-  if(!cardioTemplates.length){el.innerHTML='<div class="empty">INGEN KONDISJONMALAR</div>';return;}
+  const cnt=document.getElementById('cardioTplCount');
+  if(cnt) cnt.textContent=cardioTemplates.length+' malar';
+  if(!cardioTemplates.length){el.innerHTML='<div class="empty" style="padding:1.5rem 0">Ingen kondisjonmalar endå</div>';return;}
   el.innerHTML=cardioTemplates.map(t=>`
-    <div class="tpl-card cardio-tpl">
-      <div class="tpl-head">
-        <div><div class="tpl-name">🏃 ${esc(t.name)}</div>
-          <div class="tpl-sub">${esc(t.activity)} · ${t.type==='interval'?(t.intervals.length+' intervall'):'Steady state'}</div></div>
-        <div class="tpl-btns">
-          <button class="btn btn-ghost" onclick="openCardioTplModal('${t.id}')">REDIGER</button>
-          <button class="btn btn-orange" onclick="loadCardioTpl('${t.id}')">START</button>
+    <div class="tpl-inline-card" style="border-color:#f0c090">
+      <div class="tpl-inline-head">
+        <div>
+          <div class="tpl-inline-name">${esc(t.name)}</div>
+          <div class="tpl-inline-sub">${esc(t.activity)} · ${t.type==='interval'?(t.intervals.length+' intervall'):'Steady state'}</div>
+        </div>
+        <div class="tpl-inline-btns">
+          <button class="btn btn-ghost" onclick="openCardioTplModal('${t.id}')">✏</button>
+          <button class="btn btn-orange" onclick="loadCardioTpl('${t.id}')">START →</button>
         </div>
       </div>
     </div>`).join('');
@@ -1230,6 +1455,14 @@ function removeWuLib(name){ wuLib=wuLib.filter(e=>e!==name);saveAll();pushToServ
 // kept for legacy compatibility
 
 function toggleLibSection(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById(id+'Arrow');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(arrow) arrow.classList.toggle('open', open);
+}
+
+function toggleOkterSection(id){
   const body=document.getElementById(id);
   const arrow=document.getElementById(id+'Arrow');
   const open=body.style.display==='none';
