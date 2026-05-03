@@ -170,6 +170,26 @@ input[type=date]{color:var(--text)}
 .edit-badge{display:inline-block;background:var(--orange);color:#fff;font-size:.62rem;letter-spacing:.1em;padding:.15rem .5rem;border-radius:3px;margin-left:.5rem;vertical-align:middle}
 
 .empty{text-align:center;color:var(--muted);padding:3.5rem 0;font-size:.85rem;letter-spacing:.15em}
+.plan-card{background:var(--surface);border:2px solid var(--border);border-radius:6px;margin-bottom:.85rem;overflow:hidden}
+.plan-card.current-week{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,122,74,.15)}
+.plan-head{padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.plan-head:hover{background:var(--surface2)}
+.plan-week-label{font-size:.68rem;color:var(--muted);letter-spacing:.16em;font-weight:700;margin-bottom:.1rem}
+.plan-week-name{font-size:1rem;font-weight:700}
+.plan-body{display:none;border-top:2px solid var(--border);background:var(--surface2)}
+.plan-body.open{display:block}
+.plan-day{padding:.65rem 1.1rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid var(--border)}
+.plan-day:last-child{border-bottom:none}
+.plan-day-name{font-size:.72rem;font-weight:700;color:var(--accent);min-width:3.5rem;letter-spacing:.08em}
+.plan-day-tpl{font-size:.85rem;color:var(--text)}
+.plan-day-rest{font-size:.82rem;color:var(--muted);font-style:italic}
+.plan-note{padding:.65rem 1.1rem;font-size:.78rem;color:var(--muted);font-style:italic;border-top:1px solid var(--border)}
+.week-banner{background:linear-gradient(135deg,var(--accent),var(--accentd));color:#fff;border-radius:6px;padding:1rem 1.1rem;margin-bottom:1.1rem}
+.week-banner-label{font-size:.62rem;letter-spacing:.2em;opacity:.8;margin-bottom:.2rem}
+.week-banner-title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.week-banner-days{display:flex;flex-direction:column;gap:.25rem}
+.week-banner-day{font-size:.82rem;opacity:.9;display:flex;gap:.6rem}
+.plan-day-edit-row{display:grid;grid-template-columns:6rem 1fr;gap:.5rem;margin-bottom:.5rem;align-items:center}
 .row2{display:flex;gap:.6rem;margin-bottom:1rem}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
 .def-rest{display:flex;align-items:center;gap:.8rem;margin-bottom:1.1rem}
@@ -200,6 +220,7 @@ input[type=date]{color:var(--text)}
 
 <nav>
   <button class="nb active" onclick="gotoView('log')">LOG</button>
+  <button class="nb" onclick="gotoView('plan')">PLAN</button>
   <button class="nb" onclick="gotoView('templates')">MALAR</button>
   <button class="nb" onclick="gotoView('history')">HISTORIKK</button>
   <button class="nb" onclick="gotoView('progress')">PROGRESJON</button>
@@ -282,6 +303,16 @@ input[type=date]{color:var(--text)}
   </div>
 </div>
 
+<!-- ════════════ PLAN VIEW ════════════ -->
+<div id="view-plan" class="view">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
+    <div class="date-line" style="margin:0">TRENINGSPLAN</div>
+    <button class="btn btn-outline" onclick="openPlanModal(null)" style="font-size:.75rem">+ NY VEKE</button>
+  </div>
+  <div id="currentWeekBanner"></div>
+  <div id="planList"></div>
+</div>
+
 <!-- ════════════ HISTORY VIEW ════════════ -->
 <div id="view-history" class="view">
   <div class="date-line">TRENINGSHISTORIKK</div>
@@ -300,28 +331,40 @@ input[type=date]{color:var(--text)}
 
 <!-- ════════════ EXERCISES VIEW ════════════ -->
 <div id="view-exercises" class="view">
-  <div class="date-line">ØVINGS- OG OPPVARMINGSBIBLIOTEK</div>
+  <div class="date-line">ØVINGSBIBLIOTEK</div>
 
-  <div class="sec-label">STYRKEØVINGAR</div>
-  <div class="row2" style="margin-bottom:.9rem">
-    <input type="text" id="newExInp" placeholder="Ny styrkeøving..." onkeydown="if(event.key==='Enter')addExLib()">
-    <button class="btn btn-outline" onclick="addExLib()">+ LEGG TIL</button>
+  <!-- Styrkeøvingar -->
+  <div class="lib-section">
+    <button class="lib-section-toggle" onclick="toggleLibSection('exSection')">
+      <span>💪 STYRKEØVINGAR</span>
+      <span id="exSectionCount" class="lib-count"></span>
+      <span id="exSectionArrow" class="lib-arrow">▶</span>
+    </button>
+    <div id="exSection" class="lib-section-body" style="display:none">
+      <div class="row2" style="margin:.75rem 0 .75rem">
+        <input type="text" id="newExInp" placeholder="Ny styrkeøving..." onkeydown="if(event.key==='Enter')addExLib()">
+        <button class="btn btn-outline" onclick="addExLib()">+ LEGG TIL</button>
+      </div>
+      <div class="lib-list" id="exLibList"></div>
+    </div>
   </div>
-  <div class="lib-list" id="exLibList" style="margin-bottom:1.6rem"></div>
 
-  <div class="sec-label" style="color:var(--orange)">KONDISJONAKTIVITETAR</div>
-  <div class="row2" style="margin-bottom:.9rem">
-    <input type="text" id="newCardioInp" placeholder="Ny kondisjonaktivitet..." onkeydown="if(event.key==='Enter')addCardioLib()">
-    <button class="btn btn-orange" onclick="addCardioLib()">+ LEGG TIL</button>
+  <!-- Kondisjon og oppvarming saman -->
+  <div class="lib-section">
+    <button class="lib-section-toggle" onclick="toggleLibSection('cardioSection')">
+      <span>🏃 KONDISJON &amp; OPPVARMING</span>
+      <span id="cardioSectionCount" class="lib-count"></span>
+      <span id="cardioSectionArrow" class="lib-arrow">▶</span>
+    </button>
+    <div id="cardioSection" class="lib-section-body" style="display:none">
+      <div class="row2" style="margin:.75rem 0 .5rem">
+        <input type="text" id="newCardioInp" placeholder="Ny aktivitet (kondisjon/oppvarming)..." onkeydown="if(event.key==='Enter')addCardioLib()">
+        <button class="btn btn-orange" onclick="addCardioLib()">+ LEGG TIL</button>
+      </div>
+      <p style="font-size:.72rem;color:var(--muted);margin-bottom:.75rem">Aktivitetar her blir tilgjengelege i både kondisjonstrening og oppvarmingsvalet.</p>
+      <div class="lib-list" id="cardioLibList"></div>
+    </div>
   </div>
-  <div class="lib-list" id="cardioLibList" style="margin-bottom:1.6rem"></div>
-
-  <div class="sec-label">OPPVARMINGSTYPAR</div>
-  <div class="row2" style="margin-bottom:.9rem">
-    <input type="text" id="newWuInp" placeholder="Ny oppvarmingstype..." onkeydown="if(event.key==='Enter')addWuLib()">
-    <button class="btn btn-outline" onclick="addWuLib()">+ LEGG TIL</button>
-  </div>
-  <div class="lib-list" id="wuLibList"></div>
 </div>
 
 </main>
@@ -361,7 +404,7 @@ input[type=date]{color:var(--text)}
     </div>
     <div id="cardioTplSteadySection" style="display:none">
       <div class="row3" style="margin-bottom:1rem">
-        <div><div class="sm-label">Tid (min)</div><input type="number" id="ctplSteadyMin" placeholder="30" inputmode="decimal"></div>
+        <div><div class="sm-label">Tid (min)</div><input type="text" id="ctplSteadyMin" placeholder="30:00" inputmode="decimal"></div>
         <div><div class="sm-label">Distanse (km)</div><input type="number" id="ctplSteadyKm" placeholder="5.0" inputmode="decimal"></div>
         <div><div class="sm-label">Intensitet</div>
           <select id="ctplSteadyIntensity">
@@ -371,6 +414,30 @@ input[type=date]{color:var(--text)}
       </div>
     </div>
     <button class="btn" style="background:var(--orange);border:none;color:#fff;font-size:.9rem;padding:1rem;width:100%" onclick="saveCardioTpl()">LAGRE KONDISJONMAL</button>
+  </div>
+</div>
+
+<!-- ════════════ PLAN MODAL ════════════ -->
+<div class="modal-bg" id="planModal">
+  <div class="modal">
+    <button class="modal-x btn" onclick="closeModal('planModal')">×</button>
+    <div class="modal-title" id="planModalTitle">NY VEKEPLAN</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem">
+      <div>
+        <div class="sm-label">Frå veke (nr)</div>
+        <input type="number" id="planWeekFrom" placeholder="1" inputmode="numeric" min="1" max="53">
+      </div>
+      <div>
+        <div class="sm-label">År</div>
+        <input type="number" id="planYear" placeholder="2025" inputmode="numeric">
+      </div>
+    </div>
+    <div class="sm-label" style="margin-bottom:.5rem">DAGAR I VEKA</div>
+    <div id="planDayRows"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:1rem" onclick="addPlanDay()">+ LEGG TIL DAG</button>
+    <div class="sm-label">NOTAT FOR VEKA (valgfritt)</div>
+    <textarea id="planNote" placeholder="t.d. fokus, intensitet, mål..." rows="2" style="margin-bottom:1rem"></textarea>
+    <button class="btn btn-primary" onclick="savePlan()">LAGRE VEKEPLAN</button>
   </div>
 </div>
 
@@ -398,7 +465,7 @@ const DEF_TEMPLATES_STR = [
   {id:'t3',name:'Bein A',exercises:[{name:'Knebøy',sets:4},{name:'Romanian deadlift',sets:3},{name:'Leg press',sets:3},{name:'Lunges',sets:3},{name:'Hip thrust',sets:3}]}
 ];
 const DEF_TEMPLATES_CARDIO = [
-  {id:'c1',name:'4x4 løping',activity:'Løping',type:'interval',intervals:[{id:'i1',min:'4',meter:'',rest:'3'},{id:'i2',min:'4',meter:'',rest:'3'},{id:'i3',min:'4',meter:'',rest:'3'},{id:'i4',min:'4',meter:'',rest:''}]},
+  {id:'c1',name:'4x4 løping',activity:'Løping',type:'interval',intervals:[{id:'i1',min:'4',meter:'',pace:'',rest:'3'},{id:'i2',min:'4',meter:'',pace:'',rest:'3'},{id:'i3',min:'4',meter:'',pace:'',rest:'3'},{id:'i4',min:'4',meter:'',pace:'',rest:''}]},
   {id:'c2',name:'30 min roleg løp',activity:'Løping',type:'steady',steady:{min:'30',km:'5',intensity:'Moderat'}}
 ];
 
@@ -411,6 +478,7 @@ let cardioLib     = lsGet('cardioLib', [...DEF_CARDIO]);
 let wuLib         = lsGet('wuLib', [...DEF_WARMUP]);
 let strTemplates  = lsGet('strTemplates', DEF_TEMPLATES_STR);
 let cardioTemplates = lsGet('cardioTemplates', DEF_TEMPLATES_CARDIO);
+let weekPlans     = lsGet('weekPlans', []);
 
 let logExs        = [];
 let logCardios    = [];
@@ -445,12 +513,13 @@ function toast(msg, red){
 function saveAll(){
   lsSet('sessions',sessions); lsSet('exLib',exLib); lsSet('cardioLib',cardioLib);
   lsSet('wuLib',wuLib); lsSet('strTemplates',strTemplates); lsSet('cardioTemplates',cardioTemplates);
+  lsSet('weekPlans',weekPlans);
 }
 
 function blankSet(prev){ return {id:uid(),kg:prev?prev.kg:'',reps:prev?prev.reps:'',rest:prev?prev.rest:''}; }
 function blankEx()     { return {id:uid(),name:'',sets:[blankSet()],rest:''}; }
-function blankInt()    { return {id:uid(),min:'',meter:'',rest:''}; }
-function blankCardio() { return {id:uid(),name:'',type:'interval',intervals:[blankInt()],steady:{min:'',km:'',intensity:'Moderat'}}; }
+function blankInt()    { return {id:uid(),min:'',meter:'',pace:'',rest:''}; }
+function blankCardio() { return {id:uid(),name:'',type:'interval',intervals:[blankInt()],cooldown:{min:'',meter:'',pace:''},totalKm:'',steady:{min:'',km:'',intensity:'Moderat'}}; }
 
 // ════════════════════════════════════════════════════════
 // SYNC
@@ -465,11 +534,12 @@ function setSyncBtn(state){
 }
 
 async function pushToServer(){
+  setSyncBtn('syncing');
   try{
     await fetch(API,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessions,exLib,cardioLib,wuLib,strTemplates,cardioTemplates,at:new Date().toISOString()})});
+      body:JSON.stringify({sessions,exLib,cardioLib,wuLib,strTemplates,cardioTemplates,weekPlans,at:new Date().toISOString()})});
     setSyncBtn('ok');
-  }catch(e){console.error(e);setSyncBtn('err');}
+  }catch(e){console.error(e);setSyncBtn('err');toast('Lagring til server feila – data er lagra lokalt',true);}
 }
 
 async function syncNow(){
@@ -485,7 +555,17 @@ async function syncNow(){
       if(data.strTemplates)    {strTemplates=data.strTemplates;  lsSet('strTemplates',strTemplates);}
       if(data.cardioTemplates) {cardioTemplates=data.cardioTemplates; lsSet('cardioTemplates',cardioTemplates);}
       document.getElementById('hCount').textContent=sessions.length+' ØKTER';
-      refreshWuSelect(); toast('Synkronisert! '+sessions.length+' økter.'); setSyncBtn('ok');
+      refreshWuSelect();
+      // Re-render active view
+      const active=document.querySelector('.view.active');
+      if(active){
+        const id=active.id.replace('view-','');
+        if(id==='history')  renderHistory();
+        if(id==='templates'){renderStrTemplates();renderCardioTemplates();}
+        if(id==='exercises')renderLibs();
+      }
+      toast('Synkronisert! '+sessions.length+' økter.');
+      setSyncBtn('ok');
     } else { toast('Ingen serverdata – brukar lokale data.'); setSyncBtn('idle'); }
   }catch(e){console.error(e);toast('Klarte ikkje hente data.',true);setSyncBtn('err');}
 }
@@ -503,9 +583,10 @@ function gotoView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const labels={log:'LOG',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'};
+  const labels={log:'LOG',plan:'PLAN',templates:'MALAR',history:'HISTORIKK',progress:'PROGRESJON',exercises:'ØVINGAR'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent.trim()===labels[name])b.classList.add('active');});
   if(name==='history')  renderHistory();
+  if(name==='plan')     renderPlan();
   if(name==='templates'){renderStrTemplates();renderCardioTemplates();}
   if(name==='progress') renderProgSelect();
   if(name==='exercises')renderLibs();
@@ -599,7 +680,9 @@ function setCardioType(id,type){
 }
 function addInterval(cardioId){ const c=logCardios.find(x=>x.id===cardioId); c.intervals.push(blankInt()); renderCardioList(); }
 function removeInterval(cardioId,intId){ const c=logCardios.find(x=>x.id===cardioId); if(c.intervals.length<=1)return; c.intervals=c.intervals.filter(i=>i.id!==intId); renderCardioList(); }
-function setIntF(cid,iid,f,v){ const c=logCardios.find(x=>x.id===cid); if(!c)return; const i=c.intervals.find(x=>x.id===iid); if(i)i[f]=v; }
+function setIntF(cid,iid,f,v){ const c=logCardios.find(x=>x.id===cid); if(!c)return; const i=c.intervals.find(x=>x.id===iid); if(i)i[f]=v; renderCardioList(); }
+function setCooldownF(cid,f,v){ const c=logCardios.find(x=>x.id===cid); if(!c)return; if(!c.cooldown)c.cooldown={min:'',meter:'',pace:''}; c.cooldown[f]=v; renderCardioList(); }
+function setCardioTopF(cid,f,v){ const c=logCardios.find(x=>x.id===cid); if(c)c[f]=v; renderCardioList(); }
 function setSteadyF(cid,f,v){ const c=logCardios.find(x=>x.id===cid); if(c)c.steady[f]=v; }
 
 function cardioActivityOptions(selected){
@@ -621,19 +704,45 @@ function renderCardioList(){
           <button class="cardio-type-btn ${c.type==='steady'?'active':''}" onclick="setCardioType('${c.id}','steady')">STEADY STATE</button>
         </div>
         ${c.type==='interval' ? `
-          <div class="int-hdr"><span>#</span><span>TID (min)</span><span>METER</span><span>PAUSE (min)</span><span></span></div>
+          <div class="int-hdr" style="grid-template-columns:1.8rem 1fr 1fr 1fr 1fr 2rem"><span>#</span><span>TID (min)</span><span>METER</span><span>FART (min/km)</span><span>PAUSE (min)</span><span></span></div>
           ${c.intervals.map((iv,ii)=>`
-            <div class="int-row">
+            <div class="int-row" style="grid-template-columns:1.8rem 1fr 1fr 1fr 1fr 2rem">
               <span class="set-n" style="color:var(--orange)">${ii+1}</span>
-              <input type="number" inputmode="decimal" placeholder="min" value="${esc(iv.min)}" onchange="setIntF('${c.id}','${iv.id}','min',this.value)">
+              <input type="text" inputmode="decimal" placeholder="0:00" value="${esc(iv.min)}" onchange="setIntF('${c.id}','${iv.id}','min',this.value)" style="font-variant-numeric:tabular-nums">
               <input type="number" inputmode="numeric" placeholder="m" value="${esc(iv.meter)}" onchange="setIntF('${c.id}','${iv.id}','meter',this.value)">
-              <input type="number" inputmode="decimal" placeholder="pause" value="${esc(iv.rest)}" onchange="setIntF('${c.id}','${iv.id}','rest',this.value)">
+              <input type="text" inputmode="decimal" placeholder="min/km" value="${esc(iv.pace)}" onchange="setIntF('${c.id}','${iv.id}','pace',this.value)">
+              <input type="text" inputmode="decimal" placeholder="0:00" value="${esc(iv.rest)}" onchange="setIntF('${c.id}','${iv.id}','rest',this.value)" style="font-variant-numeric:tabular-nums">
               <button class="set-del" onclick="removeInterval('${c.id}','${iv.id}')">×</button>
             </div>`).join('')}
           <button class="btn btn-ghost" style="margin-top:.5rem;font-size:.72rem;border-color:var(--orange);color:var(--orange)" onclick="addInterval('${c.id}')">+ INTERVALL</button>
+          <div style="margin-top:.75rem;border-top:1px solid #f0c090;padding-top:.75rem">
+            <div class="sm-label" style="color:var(--orange);margin-bottom:.4rem">NEDKJØLING / NEDJOGG</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;margin-bottom:.75rem">
+              <div><div class="sm-label" style="font-size:.62rem">Tid (min)</div>
+                <input type="text" inputmode="decimal" placeholder="0:00" value="${esc(c.cooldown&&c.cooldown.min)}" onchange="setCooldownF('${c.id}','min',this.value)" style="font-variant-numeric:tabular-nums"></div>
+              <div><div class="sm-label" style="font-size:.62rem">Meter</div>
+                <input type="number" inputmode="numeric" placeholder="500" value="${esc(c.cooldown&&c.cooldown.meter)}" onchange="setCooldownF('${c.id}','meter',this.value)"></div>
+              <div><div class="sm-label" style="font-size:.62rem">Fart (min/km)</div>
+                <input type="text" inputmode="decimal" placeholder="min/km" value="${esc(c.cooldown&&c.cooldown.pace)}" onchange="setCooldownF('${c.id}','pace',this.value)"></div>
+            </div>
+            <div class="sm-label" style="color:var(--orange);margin-bottom:.4rem">TOTAL LENGDE</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;align-items:center">
+              <div>
+                <div class="sm-label" style="font-size:.62rem">Total km (valgfritt)</div>
+                <input type="number" inputmode="decimal" placeholder="auto" value="${esc(c.totalKm)}" onchange="setCardioTopF('${c.id}','totalKm',this.value)">
+              </div>
+              <div style="font-size:.78rem;color:var(--muted);padding-top:1.2rem">
+                ${(()=>{
+                  if(c.totalKm) return '<span style="color:var(--orange);font-weight:700">'+parseFloat(c.totalKm).toFixed(2)+' km (manuelt)</span>';
+                  const autoKm = c.intervals.reduce((a,iv)=>a+(parseFloat(iv.meter)||0),0)/1000 + (c.cooldown?parseFloat(c.cooldown.meter)||0:0)/1000;
+                  return autoKm>0?'<span>≈ '+autoKm.toFixed(2)+' km (sum av intervall)</span>':'<span style="color:#ccc">— km</span>';
+                })()}
+              </div>
+            </div>
+          </div>
         ` : `
           <div class="row3">
-            <div><div class="sm-label">Tid (min)</div><input type="number" inputmode="decimal" placeholder="30" value="${esc(c.steady.min)}" onchange="setSteadyF('${c.id}','min',this.value)"></div>
+            <div><div class="sm-label">Tid (min)</div><input type="text" inputmode="decimal" placeholder="0:00" value="${esc(c.steady.min)}" onchange="setSteadyF('${c.id}','min',this.value)" style="font-variant-numeric:tabular-nums"></div>
             <div><div class="sm-label">Distanse (km)</div><input type="number" inputmode="decimal" placeholder="5.0" value="${esc(c.steady.km)}" onchange="setSteadyF('${c.id}','km',this.value)"></div>
             <div><div class="sm-label">Intensitet</div>
               <select onchange="setSteadyF('${c.id}','intensity',this.value)">
@@ -845,7 +954,9 @@ function renderHistory(){
         ${(s.cardios||[]).filter(c=>c.name).map(c=>`
           <div class="hist-cardio-ex">${esc(c.name).toUpperCase()} — ${c.type==='interval'?'INTERVALL':'STEADY STATE'}</div>
           ${c.type==='interval'
-            ? c.intervals.map((iv,j)=>`<div class="hist-set"><span>Int ${j+1}</span>${iv.min?`<span>${iv.min} min</span>`:''} ${iv.meter?`<span>${iv.meter} m</span>`:''} ${iv.rest?`<span>Pause: ${iv.rest} min</span>`:''}</div>`).join('')
+            ? c.intervals.map((iv,j)=>`<div class="hist-set"><span>Int ${j+1}</span>${iv.min?`<span>${iv.min} min</span>`:''} ${iv.meter?`<span>${iv.meter} m</span>`:''} ${iv.pace?`<span>${iv.pace} min/km</span>`:''} ${iv.rest?`<span>Pause: ${iv.rest} min</span>`:''}</div>`).join('')
+            + (c.cooldown&&(c.cooldown.min||c.cooldown.meter)?`<div class="hist-set" style="color:var(--muted);font-style:italic"><span>Nedjogg:</span>${c.cooldown.min?`<span>${c.cooldown.min} min</span>`:''} ${c.cooldown.meter?`<span>${c.cooldown.meter} m</span>`:''} ${c.cooldown.pace?`<span>${c.cooldown.pace} min/km</span>`:''}</div>`:'')
+            + (()=>{ if(c.totalKm) return `<div class="hist-set" style="font-weight:700;color:var(--orange)"><span>Total:</span><span>${c.totalKm} km</span></div>`; const auto=((c.intervals||[]).reduce((a,iv)=>a+(parseFloat(iv.meter)||0),0)+(c.cooldown?parseFloat(c.cooldown.meter)||0:0))/1000; return auto>0?`<div class="hist-set" style="color:var(--orange)"><span>Total (auto):</span><span>≈ ${auto.toFixed(2)} km</span></div>`:''; })()
             : `<div class="hist-set">${c.steady.min?`<span>${c.steady.min} min</span>`:''} ${c.steady.km?`<span>${c.steady.km} km</span>`:''} ${c.steady.intensity?`<span>${c.steady.intensity}</span>`:''}</div>`
           }`).join('')}
         ${(s.exercises||[]).filter(e=>e.name).map(ex=>`
@@ -1023,10 +1134,11 @@ function renderCardioTplInts(){
         <span class="sm-label" style="margin:0;color:var(--orange)">INTERVALL ${i+1}</span>
         ${cardioTplRows.length>1?`<button class="btn btn-danger" style="padding:.18rem .5rem" onclick="removeCardioTplInt('${r.id}')">SLETT</button>`:''}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem">
-        <div><div class="sm-label">Tid (min)</div><input type="number" inputmode="decimal" placeholder="4" value="${esc(r.min)}" onchange="setCardioTplIntF('${r.id}','min',this.value)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem">
+        <div><div class="sm-label">Tid (min:sek)</div><input type="text" inputmode="decimal" placeholder="4:00" value="${esc(r.min||'')}" onchange="setCardioTplIntF('${r.id}','min',this.value)"></div>
         <div><div class="sm-label">Meter</div><input type="number" inputmode="numeric" placeholder="1000" value="${esc(r.meter)}" onchange="setCardioTplIntF('${r.id}','meter',this.value)"></div>
-        <div><div class="sm-label">Pause (min)</div><input type="number" inputmode="decimal" placeholder="3" value="${esc(r.rest)}" onchange="setCardioTplIntF('${r.id}','rest',this.value)"></div>
+        <div><div class="sm-label">Fart (min/km)</div><input type="text" inputmode="decimal" placeholder="4:30" value="${esc(r.pace||'')}" onchange="setCardioTplIntF('${r.id}','pace',this.value)"></div>
+        <div><div class="sm-label">Pause (min:sek)</div><input type="text" inputmode="decimal" placeholder="3:00" value="${esc(r.rest)}" onchange="setCardioTplIntF('${r.id}','rest',this.value)"></div>
       </div>
     </div>`).join('');
 }
@@ -1100,9 +1212,12 @@ function removeExLib(name){ exLib=exLib.filter(e=>e!==name);saveAll();pushToServ
 
 function addCardioLib(){
   const inp=document.getElementById('newCardioInp'),name=inp.value.trim();
-  if(!name||cardioLib.includes(name)){toast('Finst allereie eller tom!',true);return;}
-  cardioLib.push(name);saveAll();pushToServer();inp.value='';renderLibs();
-  refreshCardioActivity('cardioTplActivity',''); toast(`"${name}" lagt til!`);
+  if(!name||(cardioLib.includes(name)&&wuLib.includes(name))){toast('Finst allereie eller tom!',true);return;}
+  if(!cardioLib.includes(name)) cardioLib.push(name);
+  if(!wuLib.includes(name)) wuLib.push(name);
+  saveAll();pushToServer();inp.value='';renderLibs();
+  refreshWuSelect(); refreshCardioActivity('cardioTplActivity','');
+  toast(`"${name}" lagt til i kondisjon og oppvarming!`);
 }
 function removeCardioLib(name){ cardioLib=cardioLib.filter(e=>e!==name);saveAll();pushToServer();renderLibs(); }
 
@@ -1112,6 +1227,15 @@ function addWuLib(){
   wuLib.push(name);saveAll();pushToServer();inp.value='';renderLibs();refreshWuSelect();toast(`"${name}" lagt til!`);
 }
 function removeWuLib(name){ wuLib=wuLib.filter(e=>e!==name);saveAll();pushToServer();renderLibs();refreshWuSelect(); }
+// kept for legacy compatibility
+
+function toggleLibSection(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById(id+'Arrow');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(arrow) arrow.classList.toggle('open', open);
+}
 
 function renderLibs(){
   const mkList=(items,defItems,removeFn)=>items.map(name=>`
@@ -1122,24 +1246,285 @@ function renderLibs(){
         <button class="btn btn-danger" onclick="${removeFn}('${esc(name)}')" style="padding:.2rem .55rem;font-size:.68rem">SLETT</button>
       </div>
     </div>`).join('');
+
+  // Merge cardio + warmup into one list
+  const allCardio=[...new Set([...cardioLib,...wuLib])];
+  const allCardioDef=[...DEF_CARDIO,...DEF_WARMUP];
+
   document.getElementById('exLibList').innerHTML=mkList(exLib,DEF_EXERCISES,'removeExLib');
-  document.getElementById('cardioLibList').innerHTML=mkList(cardioLib,DEF_CARDIO,'removeCardioLib');
-  document.getElementById('wuLibList').innerHTML=mkList(wuLib,DEF_WARMUP,'removeWuLib');
+  document.getElementById('cardioLibList').innerHTML=mkList(allCardio,allCardioDef,'removeCardioOrWu');
+
+  // Update counts
+  const exCount=document.getElementById('exSectionCount');
+  const cardioCount=document.getElementById('cardioSectionCount');
+  if(exCount) exCount.textContent=exLib.length+' øvingar';
+  if(cardioCount) cardioCount.textContent=allCardio.length+' aktivitetar';
+}
+
+function removeCardioOrWu(name){
+  // Remove from whichever list it belongs to
+  if(cardioLib.includes(name)){ cardioLib=cardioLib.filter(e=>e!==name); lsSet('cardioLib',cardioLib); }
+  if(wuLib.includes(name)){ wuLib=wuLib.filter(e=>e!==name); lsSet('wuLib',wuLib); }
+  refreshWuSelect(); renderLibs(); pushToServer();
 }
 
 // ════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// PLAN
+// ════════════════════════════════════════════════════════
+
+const DAYS = ['Måndag','Tysdag','Onsdag','Torsdag','Fredag','Laurdag','Sundag'];
+
+function getISOWeek(date){
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const day=d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-day);
+  const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return [Math.ceil((((d-yearStart)/86400000)+1)/7), d.getUTCFullYear()];
+}
+
+function getWeekDateRange(week, year){
+  // Find Monday of that ISO week
+  const jan4 = new Date(Date.UTC(year,0,4));
+  const startOfWeek1 = new Date(jan4);
+  startOfWeek1.setUTCDate(jan4.getUTCDate()-(jan4.getUTCDay()||7)+1);
+  const monday = new Date(startOfWeek1);
+  monday.setUTCDate(startOfWeek1.getUTCDate()+(week-1)*7);
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate()+6);
+  const fmt = d => d.toLocaleDateString('nb-NO',{day:'numeric',month:'short'});
+  return fmt(monday)+' – '+fmt(sunday);
+}
+
+let planDayRows = [];
+let editPlanId  = null;
+
+function allTemplates(){
+  return [
+    ...strTemplates.map(t=>({id:t.id, label:'💪 '+t.name, type:'strength'})),
+    ...cardioTemplates.map(t=>({id:t.id, label:'🏃 '+t.name, type:'cardio'})),
+    {id:'rest', label:'😴 Kviledag', type:'rest'}
+  ];
+}
+
+function renderPlan(){
+  const [curWeek, curYear] = getISOWeek(new Date());
+
+  // Current week banner
+  const bannerEl = document.getElementById('currentWeekBanner');
+  const curPlan = weekPlans.find(p=>p.week===curWeek && p.year===curYear);
+  if(curPlan){
+    const activeDays = (curPlan.days||[]).filter(d=>d.templateId!=='rest');
+    bannerEl.innerHTML = `
+      <div class="week-banner">
+        <div class="week-banner-label">DENNE VEKA – VEK ${curWeek}</div>
+        <div class="week-banner-title">${esc(curPlan.note)||'Treningsplan'}</div>
+        <div class="week-banner-days">
+          ${(curPlan.days||[]).map(d=>`
+            <div class="week-banner-day">
+              <span style="opacity:.7;min-width:4rem">${esc(d.day)}</span>
+              <span>${d.templateId==='rest'?'Kviledag':esc(d.templateLabel||d.templateId)}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } else {
+    bannerEl.innerHTML = '';
+  }
+
+  // Plan list
+  const el = document.getElementById('planList');
+  if(!weekPlans.length){ el.innerHTML='<div class="empty">INGEN PLANAR ENDÅ – TRYKK + NY VEKE</div>'; return; }
+
+  const sorted = [...weekPlans].sort((a,b)=> a.year!==b.year ? a.year-b.year : a.week-b.week);
+  el.innerHTML = sorted.map(p=>{
+    const isCurrent = p.week===curWeek && p.year===curYear;
+    const isPast = (p.year < curYear) || (p.year===curYear && p.week < curWeek);
+    return `
+    <div class="plan-card ${isCurrent?'current-week':''}">
+      <div class="plan-head" onclick="togglePlanCard('${p.id}')">
+        <div>
+          <div class="plan-week-label">
+            ${isCurrent?'✓ DENNE VEKA · ':isPast?'':''}VEK ${p.week}, ${p.year}
+            <span style="font-weight:400;margin-left:.4rem">${getWeekDateRange(p.week,p.year)}</span>
+          </div>
+          <div class="plan-week-name">${(p.days||[]).filter(d=>d.templateId!=='rest').length} treningsdagar
+            ${p.note?`<span style="font-size:.72rem;color:var(--muted);font-weight:400"> · ${esc(p.note)}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span style="font-size:.85rem;color:var(--muted)" id="ptog-${p.id}">▼</span>
+          <button class="btn btn-ghost" style="font-size:.7rem;padding:.28rem .65rem"
+            onclick="event.stopPropagation();openPlanModal('${p.id}')">✏ ENDRE</button>
+          <button class="btn btn-danger" style="font-size:.7rem;padding:.28rem .65rem"
+            onclick="event.stopPropagation();deletePlan('${p.id}')">SLETT</button>
+        </div>
+      </div>
+      <div class="plan-body" id="pb-${p.id}">
+        ${(p.days||[]).map(d=>`
+          <div class="plan-day">
+            <span class="plan-day-name">${esc(d.day).substring(0,3).toUpperCase()}</span>
+            ${d.templateId==='rest'
+              ? '<span class="plan-day-rest">Kviledag</span>'
+              : `<span class="plan-day-tpl">${esc(d.templateLabel||d.templateId)}</span>`}
+          </div>`).join('')}
+        ${p.note?`<div class="plan-note">${esc(p.note)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePlanCard(id){
+  const b=document.getElementById('pb-'+id), t=document.getElementById('ptog-'+id);
+  const open=b.classList.toggle('open'); t.textContent=open?'▲':'▼';
+}
+
+function openPlanModal(id){
+  editPlanId=id;
+  const p=id?weekPlans.find(x=>x.id===id):null;
+  document.getElementById('planModalTitle').textContent=p?'REDIGER VEKEPLAN':'NY VEKEPLAN';
+  const [curWeek,curYear]=getISOWeek(new Date());
+  document.getElementById('planWeekFrom').value=p?p.week:curWeek;
+  document.getElementById('planYear').value=p?p.year:curYear;
+  document.getElementById('planNote').value=p?p.note||'':'';
+  planDayRows=p&&p.days?p.days.map(d=>({...d,_id:uid()})):
+    DAYS.map(day=>({_id:uid(),day,templateId:'rest',templateLabel:'Kviledag'}));
+  renderPlanDayRows();
+  document.getElementById('planModal').classList.add('open');
+}
+
+function addPlanDay(){
+  planDayRows.push({_id:uid(),day:'Måndag',templateId:'rest',templateLabel:'Kviledag'});
+  renderPlanDayRows();
+}
+
+function removePlanDay(id){
+  planDayRows=planDayRows.filter(r=>r._id!==id);
+  renderPlanDayRows();
+}
+
+function setPlanDayName(id,val){
+  const r=planDayRows.find(x=>x._id===id); if(r) r.day=val;
+}
+
+function setPlanDayTemplate(id,val){
+  const r=planDayRows.find(x=>x._id===id); if(!r) return;
+  r.templateId=val;
+  const tpl=allTemplates().find(t=>t.id===val);
+  r.templateLabel=tpl?tpl.label.replace(/^[^ ]+ /,''):val;
+}
+
+function renderPlanDayRows(){
+  const tpls=allTemplates();
+  document.getElementById('planDayRows').innerHTML=planDayRows.map(r=>`
+    <div style="background:var(--surface2);border:2px solid var(--border);border-radius:5px;padding:.8rem;margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <select style="width:auto;font-size:.85rem;font-weight:700;border:none;background:none;color:var(--accent);padding:0;background-image:none"
+          onchange="setPlanDayName('${r._id}',this.value)">
+          ${DAYS.map(d=>`<option value="${d}" ${r.day===d?'selected':''}>${d}</option>`).join('')}
+        </select>
+        <button class="btn btn-danger" style="padding:.18rem .5rem;font-size:.62rem" onclick="removePlanDay('${r._id}')">SLETT</button>
+      </div>
+      <select onchange="setPlanDayTemplate('${r._id}',this.value)">
+        ${tpls.map(t=>`<option value="${t.id}" ${r.templateId===t.id?'selected':''}>${t.label}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+function savePlan(){
+  const week=parseInt(document.getElementById('planWeekFrom').value);
+  const year=parseInt(document.getElementById('planYear').value);
+  if(!week||!year){toast('Fyll inn vekenummer og år!',true);return;}
+  if(week<1||week>53){toast('Vekenummer må vere mellom 1 og 53!',true);return;}
+
+  const plan={
+    id: editPlanId||uid(),
+    week, year,
+    note: document.getElementById('planNote').value.trim(),
+    days: planDayRows.map(r=>({day:r.day,templateId:r.templateId,templateLabel:r.templateLabel}))
+  };
+
+  // Check duplicate (not self)
+  const dup=weekPlans.find(p=>p.week===week&&p.year===year&&p.id!==plan.id);
+  if(dup){ toast(`Det finst allereie ein plan for veke ${week}, ${year}!`,true); return; }
+
+  if(editPlanId) weekPlans=weekPlans.map(p=>p.id===editPlanId?plan:p);
+  else weekPlans.push(plan);
+
+  saveAll(); closeModal('planModal'); renderPlan(); pushToServer();
+  toast(editPlanId?'Vekeplan oppdatert!':'Vekeplan lagra!');
+}
+
+function deletePlan(id){
+  weekPlans=weekPlans.filter(p=>p.id!==id);
+  saveAll(); renderPlan(); pushToServer();
+  toast('Vekeplan sletta!');
+}
+
 function init(){
   document.getElementById('sessionDate').value=today();
   document.getElementById('hCount').textContent=sessions.length+' ØKTER';
   logExs=[blankEx()]; logCardios=[blankCardio()];
   renderExList(); renderCardioList();
   refreshWuSelect();
-  syncNow();
+}
+
+// ── Robust startup sync ──────────────────────────────────
+async function startupSync(){
+  showLoadingOverlay('Hentar treningsdata frå server...');
+  try {
+    const res  = await fetch(API+'?t='+Date.now());
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if(data && (data.sessions || data.exLib)){
+      if(data.sessions)          { sessions=data.sessions;              lsSet('sessions',sessions); }
+      if(data.exLib)             { exLib=data.exLib;                    lsSet('exLib',exLib); }
+      if(data.cardioLib)         { cardioLib=data.cardioLib;            lsSet('cardioLib',cardioLib); }
+      if(data.wuLib)             { wuLib=data.wuLib;                    lsSet('wuLib',wuLib); }
+      if(data.strTemplates)      { strTemplates=data.strTemplates;      lsSet('strTemplates',strTemplates); }
+      if(data.cardioTemplates)   { cardioTemplates=data.cardioTemplates;lsSet('cardioTemplates',cardioTemplates); }
+      document.getElementById('hCount').textContent=sessions.length+' ØKTER';
+      refreshWuSelect();
+      setSyncBtn('ok');
+      hideLoadingOverlay('✓ Data lasta inn – '+sessions.length+' økter');
+    } else {
+      hideLoadingOverlay('Ingen serverdata – brukar lokale data');
+    }
+  } catch(e) {
+    console.error(e);
+    hideLoadingOverlay('⚠ Klarte ikkje nå server – viser lokale data', true);
+  }
+}
+
+function showLoadingOverlay(msg){
+  let el=document.getElementById('loadingOverlay');
+  if(!el){
+    el=document.createElement('div');
+    el.id='loadingOverlay';
+    el.style.cssText='position:fixed;inset:0;background:rgba(12,36,25,0.92);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;';
+    el.innerHTML=\`<div style="font-family:DM Serif Display,serif;font-size:2.5rem;color:#fff">LØFT</div>
+      <div id="loadingMsg" style="font-size:.85rem;color:#6aaf90;letter-spacing:.15em;text-align:center;padding:0 2rem"></div>
+      <div style="width:48px;height:48px;border:3px solid #0e7a4a;border-top-color:#6ef7a0;border-radius:50%;animation:spin .8s linear infinite"></div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>\`;
+    document.body.appendChild(el);
+  }
+  document.getElementById('loadingMsg').textContent=msg;
+  el.style.display='flex';
+}
+
+function hideLoadingOverlay(msg, warn){
+  const el=document.getElementById('loadingOverlay');
+  if(!el) return;
+  document.getElementById('loadingMsg').textContent=msg;
+  const spinner=el.querySelector('div:last-of-type');
+  if(spinner) spinner.style.display='none';
+  if(warn) el.style.background='rgba(192,57,43,0.9)';
+  setTimeout(()=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); },1800);
 }
 
 init();
+startupSync();
 </script>
 </body>
 </html>
