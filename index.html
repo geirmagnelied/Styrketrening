@@ -137,6 +137,10 @@ input[type=date]{color:var(--text)}
 .hist-group-btns{display:flex;gap:.3rem}
 .hist-grp-btn{font-family:inherit;font-size:.65rem;font-weight:700;letter-spacing:.12em;padding:.38rem .75rem;background:var(--surface);border:2px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;transition:all .15s}
 .hist-grp-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.hist-sub-tabs{display:flex;gap:.5rem;margin-bottom:1rem;border-bottom:2px solid var(--border);padding-bottom:.75rem}
+.hist-sub-btn{flex:1;padding:.65rem;background:var(--surface);border:2px solid var(--border);border-radius:5px;color:var(--muted);font-family:inherit;font-size:.72rem;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+.hist-sub-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hist-sub-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .hist-group-card{background:var(--surface);border:2px solid var(--border);border-radius:8px;margin-bottom:.85rem;overflow:hidden}
 .hist-group-head{padding:.9rem 1.1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .hist-group-head:hover{background:var(--surface2)}
@@ -270,7 +274,6 @@ input[type=date]{color:var(--text)}
   <button class="nb" onclick="gotoView('plan')">PLAN</button>
   <button class="nb" onclick="gotoView('okter')">ØKTER</button>
   <button class="nb" onclick="gotoView('history')">HISTORIKK</button>
-  <button class="nb" onclick="gotoView('progress')">PROGRESJON</button>
 </nav>
 
 <main>
@@ -428,27 +431,45 @@ input[type=date]{color:var(--text)}
 
 </div>
 
-<!-- ════════════ HISTORY VIEW ════════════ -->
-<div id="view-history" class="view">
+<!-- ════════════ PLAN VIEW ════════════ -->
+<div id="view-plan" class="view">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
-    <div class="date-line" style="margin:0">TRENINGSHISTORIKK</div>
-    <div class="hist-group-btns">
-      <button class="hist-grp-btn active" id="grpWeek"  onclick="setHistGroup('week')">VEK</button>
-      <button class="hist-grp-btn" id="grpMonth" onclick="setHistGroup('month')">MND</button>
-      <button class="hist-grp-btn" id="grpYear"  onclick="setHistGroup('year')">ÅR</button>
-    </div>
+    <div class="date-line" style="margin:0">TRENINGSPLAN</div>
+    <button class="btn btn-outline" onclick="openPlanModal(null)" style="font-size:.75rem">+ NY VEKE</button>
   </div>
-  <div id="histList"></div>
+  <div id="currentWeekBanner"></div>
+  <div id="planList"></div>
 </div>
 
-<!-- ════════════ PROGRESS VIEW ════════════ -->
-<div id="view-progress" class="view">
-  <div class="sm-label">Vel øving</div>
-  <select id="progSel" onchange="drawCharts()" style="margin-bottom:1.2rem"></select>
-  <div class="sec-label">MAKS VEKT (KG)</div>
-  <div class="chart-box"><canvas id="cW"></canvas></div>
-  <div class="sec-label">TOTAL VOLUM (KG × REPS)</div>
-  <div class="chart-box"><canvas id="cV"></canvas></div>
+<!-- ════════════ HISTORY VIEW (merged with progress) ════════════ -->
+<div id="view-history" class="view">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <div class="date-line" style="margin:0">HISTORIKK</div>
+    <div class="hist-group-btns">
+      <button class="hist-grp-btn active" id="grpWeek"  onclick="setHistGroup('week')">Veke</button>
+      <button class="hist-grp-btn" id="grpMonth" onclick="setHistGroup('month')">Måned</button>
+      <button class="hist-grp-btn" id="grpYear"  onclick="setHistGroup('year')">År</button>
+    </div>
+  </div>
+  <!-- Sub-tabs: Historikk vs Progresjon -->
+  <div class="hist-sub-tabs">
+    <button class="hist-sub-btn active" id="subHist" onclick="setHistSub('hist')">📋 HISTORIKK</button>
+    <button class="hist-sub-btn" id="subProg" onclick="setHistSub('prog')">📈 PROGRESJON</button>
+  </div>
+  <!-- Historikk panel -->
+  <div id="histPanel">
+    <div id="histList"></div>
+  </div>
+  <!-- Progresjon panel -->
+  <div id="progPanel" style="display:none">
+    <div class="sm-label" style="margin-bottom:.5rem">Vel øving</div>
+    <select id="progSel" onchange="drawCharts()" style="margin-bottom:1.2rem"></select>
+    <div class="sec-label">MAKS VEKT (KG)</div>
+    <div class="chart-box"><canvas id="cW"></canvas></div>
+    <div class="sec-label">TOTAL VOLUM (KG × REPS)</div>
+    <div class="chart-box"><canvas id="cV"></canvas></div>
+  </div>
+</div>
 </div>
 
 <!-- ════════════ EXERCISES VIEW ════════════ -->
@@ -705,12 +726,11 @@ function gotoView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const labels={log:'LOG',plan:'PLAN',okter:'ØKTER',history:'HISTORIKK',progress:'PROGRESJON'};
+  const labels={log:'LOG',plan:'PLAN',okter:'ØKTER',history:'HISTORIKK'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent.trim()===labels[name])b.classList.add('active');});
-  if(name==='history')  renderHistory();
+  if(name==='history')  {renderHistory();}
   if(name==='plan')     renderPlan();
   if(name==='okter')    {renderStrTemplates();renderCardioTemplates();renderLibs();}
-  if(name==='progress') renderProgSelect();
 }
 
 // ════════════════════════════════════════════════════════
@@ -1051,6 +1071,16 @@ function setHistGroup(g){
     if(b) b.classList.toggle('active', x===g);
   });
   renderHistory();
+}
+
+let histSub='hist';
+function setHistSub(sub){
+  histSub=sub;
+  document.getElementById('subHist').classList.toggle('active', sub==='hist');
+  document.getElementById('subProg').classList.toggle('active', sub==='prog');
+  document.getElementById('histPanel').style.display  = sub==='hist'?'block':'none';
+  document.getElementById('progPanel').style.display  = sub==='prog'?'block':'none';
+  if(sub==='prog') renderProgSelect();
 }
 
 function getGroupKey(dateStr){
