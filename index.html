@@ -197,6 +197,29 @@ input[type=date]{color:var(--text)}
 
 .empty{text-align:center;color:var(--muted);padding:3.5rem 0;font-size:.85rem;letter-spacing:.15em}
 
+/* ── Dashboard ── */
+.dash-today-card{background:var(--surface);border:2px solid var(--accent);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.dash-today-hdr{background:linear-gradient(135deg,var(--accent),var(--accentd));padding:.85rem 1.1rem}
+.dash-today-label{font-size:.62rem;letter-spacing:.22em;color:rgba(255,255,255,.75);margin-bottom:.15rem;font-weight:700}
+.dash-today-date{font-size:.82rem;color:#fff;font-weight:700;letter-spacing:.08em}
+.dash-session-row{padding:.8rem 1.1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:.75rem}
+.dash-session-row:last-child{border-bottom:none}
+.dash-session-info .type-label{font-size:.6rem;color:var(--muted);letter-spacing:.14em;font-weight:700;margin-bottom:.12rem}
+.dash-session-info .name{font-size:.95rem;font-weight:700;color:var(--text)}
+.dash-session-info .sub{font-size:.7rem;color:var(--muted);margin-top:.08rem}
+.dash-start-btn{background:var(--accent);border:none;border-radius:5px;color:#fff;font-family:inherit;font-size:.72rem;font-weight:700;letter-spacing:.14em;padding:.55rem 1rem;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0}
+.dash-start-btn:hover{background:var(--accentd)}
+.dash-start-btn.orange{background:var(--orange)}
+.dash-start-btn.orange:hover{background:#8a4400}
+.dash-rest-day{background:var(--surface);border:2px solid var(--border);border-radius:8px;padding:1.4rem 1.1rem;margin-bottom:1rem;text-align:center}
+.dash-rest-day .emoji{font-size:2rem;margin-bottom:.5rem}
+.dash-rest-day .msg{font-size:.88rem;color:var(--text);font-weight:600;margin-bottom:.2rem}
+.dash-rest-day .sub{font-size:.75rem;color:var(--muted)}
+.dash-quote{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:.85rem;color:var(--muted);font-style:italic;line-height:1.5}
+.dash-new-btn{width:100%;padding:.85rem;background:var(--surface);border:2px solid var(--border);border-radius:6px;color:var(--muted);font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.15em;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.dash-new-btn:hover{border-color:var(--accent);color:var(--accent)}
+.dash-new-btn.open{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+
 /* ── Økter view ── */
 .okter-section{border:2px solid var(--border);border-radius:8px;margin-bottom:.85rem;overflow:hidden;background:var(--surface)}
 .okter-section-hdr{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.1rem;cursor:pointer;background:var(--surface);transition:background .15s;user-select:none}
@@ -270,69 +293,89 @@ input[type=date]{color:var(--text)}
 </header>
 
 <nav>
-  <button class="nb active" onclick="gotoView('log')">LOG</button>
-  <button class="nb" onclick="gotoView('plan')">PLAN</button>
+  <button class="nb active" onclick="gotoView('log')">DASHBOARD</button>
+  <button class="nb" onclick="gotoView('plan')">TRENINGSPLAN</button>
   <button class="nb" onclick="gotoView('okter')">ØKTER</button>
   <button class="nb" onclick="gotoView('history')">HISTORIKK</button>
 </nav>
 
 <main>
 
-<!-- ════════════ LOG VIEW ════════════ -->
+<!-- ════════════ DASHBOARD VIEW ════════════ -->
 <div id="view-log" class="view active">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
-    <div class="date-line" style="margin:0" id="editBadge"></div>
-    <input type="date" id="sessionDate" style="width:auto;font-size:.85rem;padding:.4rem .6rem">
+
+  <!-- ── Dagens plan ── -->
+  <div id="dashboardSection">
+    <div id="todayPlanBlock"></div>
+
+    <!-- Sitat -->
+    <div id="quoteBlock" class="dash-quote">
+      <span id="quoteText"></span>
+    </div>
+
+    <!-- Start ny økt manuelt -->
+    <button class="dash-new-btn" id="newSessionToggle" onclick="toggleNewSession()">
+      <span id="newSessionToggleIcon">＋</span> NY ØKTREGISTRERING
+    </button>
   </div>
 
-  <!-- Session type -->
-  <div class="sec-label">TYPE ØKT</div>
-  <div class="type-toggle">
-    <button class="type-btn active-strength" id="typeStrength" onclick="setSessionType('strength')">💪 STYRKE</button>
-    <button class="type-btn" id="typeCardio"   onclick="setSessionType('cardio')">🏃 KONDISJON</button>
-    <button class="type-btn" id="typeBoth"     onclick="setSessionType('both')">⚡ BEGGE</button>
-  </div>
+  <!-- ── Øktskjema (skjult som standard) ── -->
+  <div id="newSessionForm" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;margin-top:1rem">
+      <div class="date-line" style="margin:0" id="editBadge"></div>
+      <input type="date" id="sessionDate" style="width:auto;font-size:.85rem;padding:.4rem .6rem">
+    </div>
 
-  <!-- Warmup -->
-  <div class="sec-label">OPPVARMING</div>
-  <div class="box">
-    <div class="row3">
-      <div>
-        <div class="sm-label">Type</div>
-        <select id="wuType"><option value="">— Ingen —</option></select>
-      </div>
-      <div>
-        <div class="sm-label">Tid (min)</div>
-        <input type="number" id="wuMin" placeholder="0" inputmode="decimal">
-      </div>
-      <div>
-        <div class="sm-label">Km</div>
-        <input type="number" id="wuKm" placeholder="0.0" inputmode="decimal">
+    <!-- Session type -->
+    <div class="sec-label">TYPE ØKT</div>
+    <div class="type-toggle">
+      <button class="type-btn active-strength" id="typeStrength" onclick="setSessionType('strength')">💪 STYRKE</button>
+      <button class="type-btn" id="typeCardio"   onclick="setSessionType('cardio')">🏃 KONDISJON</button>
+      <button class="type-btn" id="typeBoth"     onclick="setSessionType('both')">⚡ BEGGE</button>
+    </div>
+
+    <!-- Warmup -->
+    <div class="sec-label">OPPVARMING</div>
+    <div class="box">
+      <div class="row3">
+        <div>
+          <div class="sm-label">Type</div>
+          <select id="wuType"><option value="">— Ingen —</option></select>
+        </div>
+        <div>
+          <div class="sm-label">Tid (min)</div>
+          <input type="number" id="wuMin" placeholder="0" inputmode="decimal">
+        </div>
+        <div>
+          <div class="sm-label">Km</div>
+          <input type="number" id="wuKm" placeholder="0.0" inputmode="decimal">
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Cardio section -->
-  <div id="cardioSection" style="display:none">
-    <div class="sec-label" style="color:var(--orange)">KONDISJONSTRENING</div>
-    <div id="cardioList"></div>
-    <button class="btn-dashed btn" style="border-color:var(--orange);color:var(--orange)" onclick="addCardio()">+ LEGG TIL KONDISJONØVING</button>
-  </div>
-
-  <!-- Strength section -->
-  <div id="strengthSection">
-    <div class="sec-label">STYRKETRENING</div>
-    <div class="def-rest">
-      <span>STD PAUSE (sek)</span>
-      <input type="number" id="defRest" placeholder="60" inputmode="numeric">
+    <!-- Cardio section -->
+    <div id="cardioSection" style="display:none">
+      <div class="sec-label" style="color:var(--orange)">KONDISJONSTRENING</div>
+      <div id="cardioList"></div>
+      <button class="btn-dashed btn" style="border-color:var(--orange);color:var(--orange)" onclick="addCardio()">+ LEGG TIL KONDISJONØVING</button>
     </div>
-    <div id="exList"></div>
-    <button class="btn-dashed btn" onclick="addExercise()">+ LEGG TIL STYRKEØVING</button>
+
+    <!-- Strength section -->
+    <div id="strengthSection">
+      <div class="sec-label">STYRKETRENING</div>
+      <div class="def-rest">
+        <span>STD PAUSE (sek)</span>
+        <input type="number" id="defRest" placeholder="60" inputmode="numeric">
+      </div>
+      <div id="exList"></div>
+      <button class="btn-dashed btn" onclick="addExercise()">+ LEGG TIL STYRKEØVING</button>
+    </div>
+
+    <textarea id="sessionNote" placeholder="Notat om økta..." rows="2" style="margin-bottom:1rem"></textarea>
+    <button class="btn btn-primary" id="saveBtn" onclick="saveSession()">LAGRE ØKT</button>
+    <button class="btn btn-ghost" id="cancelEditBtn" onclick="cancelEdit()" style="width:100%;margin-top:.6rem;display:none">AVBRYT REDIGERING</button>
   </div>
 
-  <textarea id="sessionNote" placeholder="Notat om økta..." rows="2" style="margin-bottom:1rem"></textarea>
-  <button class="btn btn-primary" id="saveBtn" onclick="saveSession()">LAGRE ØKT</button>
-  <button class="btn btn-ghost" id="cancelEditBtn" onclick="cancelEdit()" style="width:100%;margin-top:.6rem;display:none">AVBRYT REDIGERING</button>
 </div>
 
 <!-- ════════════ ØKTER VIEW ════════════ -->
@@ -526,7 +569,7 @@ input[type=date]{color:var(--text)}
 <div class="modal-bg" id="planModal">
   <div class="modal">
     <button class="modal-x btn" onclick="closeModal('planModal')">×</button>
-    <div class="modal-title" id="planModalTitle">NY VEKEPLAN</div>
+    <div class="modal-title" id="planModalTitle">NY TRENINGSPLAN</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem">
       <div>
         <div class="sm-label">Frå veke (nr)</div>
@@ -688,8 +731,9 @@ function gotoView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+name).classList.add('active');
-  const labels={log:'LOG',plan:'PLAN',okter:'ØKTER',history:'HISTORIKK'};
+  const labels={log:'DASHBOARD',plan:'TRENINGSPLAN',okter:'ØKTER',history:'HISTORIKK'};
   document.querySelectorAll('.nb').forEach(b=>{if(b.textContent.trim()===labels[name])b.classList.add('active');});
+  if(name==='log')      renderDashboard();
   if(name==='history')  {renderHistory();}
   if(name==='plan')     renderPlan();
   if(name==='okter')    {renderStrTemplates();renderCardioTemplates();renderLibs();}
@@ -904,6 +948,14 @@ function resetLogForm(){
   document.getElementById('saveBtn').textContent='LAGRE ØKT';
   document.getElementById('cancelEditBtn').style.display='none';
   document.getElementById('editBadge').innerHTML='';
+  // Close the form and go back to dashboard view
+  const form=document.getElementById('newSessionForm');
+  const btn=document.getElementById('newSessionToggle');
+  const icon=document.getElementById('newSessionToggleIcon');
+  if(form){ form.style.display='none'; }
+  if(btn)  btn.classList.remove('open');
+  if(icon) icon.textContent='＋';
+  renderDashboard();
 }
 
 function cancelEdit(){ resetLogForm(); }
@@ -1623,7 +1675,7 @@ function togglePlanCard(id){
 function openPlanModal(id){
   editPlanId=id;
   const p=id?weekPlans.find(x=>x.id===id):null;
-  document.getElementById('planModalTitle').textContent=p?'REDIGER VEKEPLAN':'NY VEKEPLAN';
+  document.getElementById('planModalTitle').textContent=p?'REDIGER TRENINGSPLAN':'NY TRENINGSPLAN';
   const [curWeek,curYear]=getISOWeek(new Date());
   document.getElementById('planWeekFrom').value=p?p.week:curWeek;
   document.getElementById('planYear').value=p?p.year:curYear;
@@ -1723,13 +1775,132 @@ function savePlan(){
   else weekPlans.push(plan);
 
   saveAll(); closeModal('planModal'); renderPlan(); pushToServer();
-  toast(editPlanId?'Vekeplan oppdatert!':'Vekeplan lagra!');
+  toast(editPlanId?'Treningsplan oppdatert!':'Treningsplan lagra!');
 }
 
 function deletePlan(id){
   weekPlans=weekPlans.filter(p=>p.id!==id);
   saveAll(); renderPlan(); pushToServer();
-  toast('Vekeplan sletta!');
+  toast('Treningsplan sletta!');
+}
+
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+
+const QUOTES = [
+  '«Den eneste dårlige treningsøkten er den som ikke ble noe av»',
+  '«Du skal ikke finne tid til å løpe, du skal ta deg tid»',
+  '«Det blir aldri lettere, du blir bare sterkere»',
+  '«Noen drømmer om suksess, andre løper seg til den»',
+  '«Du kan enten lide gjennom disiplin, eller lide gjennom anger»'
+];
+
+function renderDashboard(){
+  renderTodayPlan();
+  renderQuote();
+}
+
+function renderTodayPlan(){
+  const el = document.getElementById('todayPlanBlock');
+  if(!el) return;
+
+  const now = new Date();
+  const [curWeek, curYear] = getISOWeek(now);
+  const todayName = DAYS[now.getDay()===0 ? 6 : now.getDay()-1]; // Mon=0..Sun=6
+
+  // Find this week's plan
+  const plan = weekPlans.find(p => p.week===curWeek && p.year===curYear);
+
+  // Get today's sessions from plan
+  const todaySessions = plan
+    ? (plan.days||[]).filter(d => d.day===todayName && d.templateId!=='rest')
+    : [];
+
+  if(!plan || todaySessions.length === 0){
+    // Check if today is explicitly marked as rest
+    const isRest = plan && (plan.days||[]).some(d => d.day===todayName && d.templateId==='rest');
+    el.innerHTML = `
+      <div class="dash-rest-day">
+        <div class="emoji">${isRest ? '😴' : '📋'}</div>
+        <div class="msg">${isRest ? 'Du har ikkje planlagt å trene i dag, - men det er lov til å ha det moro likevel!' : 'Du har ikkje planlagt å trene i dag, - men det er lov til å ha det moro likevel!'}</div>
+        <div class="sub">${isRest ? '' : 'Gå til TRENINGSPLAN-fana for å setje opp vekeplanen din'}</div>
+      </div>`;
+    return;
+  }
+
+  const dateStr = now.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'});
+
+  el.innerHTML = `
+    <div class="dash-today-card">
+      <div class="dash-today-hdr">
+        <div class="dash-today-label">DAGENS PLAN</div>
+        <div class="dash-today-date">${dateStr.charAt(0).toUpperCase()+dateStr.slice(1)}</div>
+      </div>
+      ${todaySessions.map(s => {
+        const isCardio = s.templateId && cardioTemplates.some(t=>t.id===s.templateId);
+        const tpl = isCardio
+          ? cardioTemplates.find(t=>t.id===s.templateId)
+          : strTemplates.find(t=>t.id===s.templateId);
+        const icon = isCardio ? '🏃' : '💪';
+        const sub = tpl
+          ? (isCardio
+              ? (tpl.activity + ' · ' + (tpl.type==='interval' ? tpl.intervals.length+' intervall' : 'Steady state'))
+              : (tpl.exercises.length+' øvingar · '+tpl.exercises.slice(0,3).map(e=>e.name).join(', ')+(tpl.exercises.length>3?'…':'')))
+          : '';
+        return `
+          <div class="dash-session-row">
+            <div class="dash-session-info">
+              <div class="type-label">${icon} ${isCardio?'KONDISJON':'STYRKE'}</div>
+              <div class="name">${esc(s.templateLabel||s.templateId)}</div>
+              ${sub?`<div class="sub">${esc(sub)}</div>`:''}
+            </div>
+            <button class="dash-start-btn ${isCardio?'orange':''}"
+              onclick="startFromDashboard('${s.templateId}','${isCardio?'cardio':'strength'}')">
+              START →
+            </button>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderQuote(){
+  const el = document.getElementById('quoteText');
+  if(!el) return;
+  // Pick a quote based on day of year so it changes daily but is consistent within a day
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0))/86400000);
+  el.textContent = QUOTES[dayOfYear % QUOTES.length];
+}
+
+function startFromDashboard(templateId, type){
+  if(type==='cardio'){
+    loadCardioTpl(templateId);
+  } else {
+    loadStrTpl(templateId);
+  }
+  // Open the form
+  openNewSession();
+}
+
+function toggleNewSession(){
+  const form = document.getElementById('newSessionForm');
+  const btn  = document.getElementById('newSessionToggle');
+  const icon = document.getElementById('newSessionToggleIcon');
+  const isOpen = form.style.display !== 'none';
+  form.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  icon.textContent = isOpen ? '＋' : '－';
+  if(!isOpen) window.scrollTo({top: document.getElementById('newSessionToggle').offsetTop - 80, behavior:'smooth'});
+}
+
+function openNewSession(){
+  const form = document.getElementById('newSessionForm');
+  const btn  = document.getElementById('newSessionToggle');
+  const icon = document.getElementById('newSessionToggleIcon');
+  form.style.display = 'block';
+  btn.classList.add('open');
+  icon.textContent = '－';
+  setTimeout(()=>window.scrollTo({top: document.getElementById('newSessionForm').offsetTop - 80, behavior:'smooth'}), 100);
 }
 
 function init(){
@@ -1738,6 +1909,7 @@ function init(){
   logExs=[blankEx()]; logCardios=[blankCardio()];
   renderExList(); renderCardioList();
   refreshWuSelect();
+  renderDashboard();
 }
 
 // ── Robust startup sync ──────────────────────────────────
@@ -1756,6 +1928,7 @@ async function startupSync(){
       if(data.cardioTemplates)   { cardioTemplates=data.cardioTemplates;lsSet('cardioTemplates',cardioTemplates); }
       document.getElementById('hCount').textContent=sessions.length+' ØKTER';
       refreshWuSelect();
+      renderDashboard();
       setSyncBtn('ok');
       hideLoadingOverlay('✓ Data lasta inn – '+sessions.length+' økter');
     } else {
