@@ -27,8 +27,8 @@ header{background:var(--hbg);padding:2.2rem 1.4rem 0.9rem;border-bottom:3px soli
 .logo{font-family:'DM Serif Display',serif;font-size:2.2rem;color:#fff;letter-spacing:-.03em;line-height:1}
 .hright{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.4rem}
 .h-count{font-size:.68rem;color:var(--hmuted);letter-spacing:.1em}
-.h-btns{display:flex;gap:.5rem}
-.h-btn{font-family:inherit;font-size:.72rem;letter-spacing:.12em;background:none;border:1px solid var(--hmuted);border-radius:5px;color:var(--hmuted);padding:.38rem .8rem;cursor:pointer;transition:all .15s}
+.h-btns{display:flex;gap:.3rem}
+.h-btn{font-family:inherit;font-size:.58rem;letter-spacing:.08em;background:none;border:1px solid var(--hmuted);border-radius:4px;color:var(--hmuted);padding:.28rem .45rem;cursor:pointer;transition:all .15s}
 .h-btn:hover{border-color:#fff;color:#fff}
 .h-btn.syncing{color:#fff;border-color:#fff;animation:pulse 1s infinite}
 .h-btn.ok{color:#6ef7a0;border-color:#6ef7a0}
@@ -86,7 +86,7 @@ input[type=date]{color:var(--text)}
 .type-btn{flex:1;padding:.7rem;background:var(--surface);border:2px solid var(--border);border-radius:5px;color:var(--muted);font-family:inherit;font-size:.78rem;font-weight:600;letter-spacing:.1em;cursor:pointer;transition:all .15s;text-align:center}
 .type-btn.active-strength{background:var(--accent);border-color:var(--accent);color:#fff}
 .type-btn.active-cardio{background:var(--orange);border-color:var(--orange);color:#fff}
-.type-btn.active-both{background:var(--blue);border-color:var(--blue);color:#fff}
+.type-btn.active-play{background:#7b3fa0;border-color:#7b3fa0;color:#fff}
 
 /* Exercise card */
 .ex-card{background:var(--surface);border:2px solid var(--border);border-radius:6px;margin-bottom:1rem;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.04)}
@@ -201,6 +201,16 @@ input[type=date]{color:var(--text)}
 
 .strava-connected{color:#fc4c02;border-color:#fc4c02}
 .strava-toast{background:#fc4c02}
+.diary-card{background:var(--surface);border:2px solid var(--border);border-radius:8px;padding:1.1rem;margin-bottom:.5rem}
+.diary-date-hdr{font-size:.68rem;color:var(--accent);letter-spacing:.18em;font-weight:700;margin-bottom:1rem}
+.diary-field{margin-bottom:.9rem}
+.diary-label{display:block;font-size:.7rem;color:var(--muted);font-weight:700;letter-spacing:.1em;margin-bottom:.3rem}
+.diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.diary-rating-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.3rem}
+.diary-rating-btn{width:2.6rem;height:2.6rem;background:var(--surface2);border:2px solid var(--border);border-radius:5px;font-family:inherit;font-size:.82rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+.diary-rating-btn:hover{border-color:var(--accent);color:var(--accent)}
+.diary-rating-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.diary-rating-val{color:var(--accent);font-size:.9rem;margin-left:.4rem}
 .empty{text-align:center;color:var(--muted);padding:3.5rem 0;font-size:.85rem;letter-spacing:.15em}
 
 /* ── Dashboard ── */
@@ -225,6 +235,12 @@ input[type=date]{color:var(--text)}
 .dash-new-btn{width:100%;padding:.85rem;background:var(--surface);border:2px solid var(--border);border-radius:6px;color:var(--muted);font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.15em;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.6rem}
 .dash-new-btn:hover{border-color:var(--accent);color:var(--accent)}
 .dash-new-btn.open{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+#newSessionToggle{background:none;border:none;color:#c0392b;font-size:.92rem;font-weight:700;letter-spacing:.1em;padding:.6rem 0;justify-content:flex-start;width:auto}
+#newSessionToggle:hover{background:none;color:#a93226}
+#newSessionToggle.open{background:none;color:#a93226}
+.new-session-circle{display:inline-flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;border-radius:50%;border:2.5px solid #c0392b;color:#c0392b;font-size:1.3rem;font-weight:400;flex-shrink:0;transition:all .15s;line-height:1}
+#newSessionToggle:hover .new-session-circle{background:#c0392b;color:#fff}
+#newSessionToggle.open .new-session-circle{background:#c0392b;color:#fff}
 
 /* ── Økter view ── */
 .okter-section{border:2px solid var(--border);border-radius:8px;margin-bottom:.85rem;overflow:hidden;background:var(--surface)}
@@ -292,10 +308,10 @@ input[type=date]{color:var(--text)}
   <div class="hright">
     <div class="h-count" id="hCount">0 ØKTER</div>
     <div class="h-btns">
-      <button class="h-btn" id="syncBtn" onclick="syncNow()">☁ SYNK</button>
-      <button class="h-btn" onclick="forcePushToServer()" title="Slå saman data frå alle einingar og lagre">⇅ FLETT</button>
-      <button class="h-btn" id="stravaBtn" onclick="handleStravaConnect()" title="Koble til Strava">🚴 STRAVA</button>
-      <button class="h-btn" onclick="exportBackup()">⬇ BACKUP</button>
+      <button class="h-btn" id="syncBtn" onclick="syncNow()">SYNK</button>
+      <button class="h-btn" onclick="forcePushToServer()">FLETT</button>
+      <button class="h-btn" id="stravaBtn" onclick="handleStravaConnect()">STRAVA</button>
+      <button class="h-btn" onclick="exportBackup()">BACKUP</button>
     </div>
   </div>
 </header>
@@ -323,7 +339,8 @@ input[type=date]{color:var(--text)}
 
     <!-- Start ny økt manuelt -->
     <button class="dash-new-btn" id="newSessionToggle" onclick="toggleNewSession()">
-      <span id="newSessionToggleIcon">＋</span> NY ØKTREGISTRERING
+      <span class="new-session-circle" id="newSessionToggleIcon">＋</span>
+      <span style="margin-left:.65rem">NY ØKT</span>
     </button>
   </div>
 
@@ -339,7 +356,7 @@ input[type=date]{color:var(--text)}
     <div class="type-toggle">
       <button class="type-btn active-strength" id="typeStrength" onclick="setSessionType('strength')">💪 STYRKE</button>
       <button class="type-btn" id="typeCardio"   onclick="setSessionType('cardio')">🏃 KONDISJON</button>
-      <button class="type-btn" id="typeBoth"     onclick="setSessionType('both')">⚡ BEGGE</button>
+      <button class="type-btn" id="typePlay"     onclick="setSessionType('play')">🤸 LEIK</button>
     </div>
 
     <!-- Warmup -->
@@ -368,6 +385,39 @@ input[type=date]{color:var(--text)}
       <button class="btn-dashed btn" style="border-color:var(--orange);color:var(--orange)" onclick="addCardio()">+ LEGG TIL KONDISJONØVING</button>
     </div>
 
+  <!-- Play section -->
+  <div id="playSection" style="display:none">
+    <div class="sec-label" style="color:#7b3fa0">🤸 LEIK OG FRI RØRSLE</div>
+    <div class="box" style="border-color:#c49ed4">
+      <div style="margin-bottom:.85rem">
+        <div class="sm-label">Aktivitet</div>
+        <select id="playActivity" style="width:100%;margin-bottom:.5rem"></select>
+        <div style="display:flex;gap:.5rem">
+          <input type="text" id="playActivityCustom" placeholder="Eller skriv ny aktivitet..." style="flex:1;font-size:.9rem;padding:.5rem .7rem;border:2px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text);font-family:inherit" onkeydown="if(event.key==='Enter')addPlayActivity()">
+          <button class="btn btn-orange" onclick="addPlayActivity()" style="white-space:nowrap;padding:.5rem .8rem;font-size:.72rem">+ LEGG TIL</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.85rem">
+        <div>
+          <div class="sm-label">Varigheit (min:sek)</div>
+          <input type="text" id="playDuration" placeholder="30:00" inputmode="decimal">
+        </div>
+        <div>
+          <div class="sm-label">Intensitet</div>
+          <select id="playIntensity">
+            <option>Låg</option>
+            <option selected>Moderat</option>
+            <option>Høg</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="sm-label">Beskriving (valgfritt)</div>
+        <input type="text" id="playDesc" placeholder="t.d. fotball, klatring, dans...">
+      </div>
+    </div>
+  </div>
+
     <!-- Strength section -->
     <div id="strengthSection">
       <div class="sec-label">STYRKETRENING</div>
@@ -382,6 +432,68 @@ input[type=date]{color:var(--text)}
     <textarea id="sessionNote" placeholder="Notat om økta..." rows="2" style="margin-bottom:1rem"></textarea>
     <button class="btn btn-primary" id="saveBtn" onclick="saveSession()">LAGRE ØKT</button>
     <button class="btn btn-ghost" id="cancelEditBtn" onclick="cancelEdit()" style="width:100%;margin-top:.6rem;display:none">AVBRYT REDIGERING</button>
+  </div>
+
+  <!-- ── Dagbok ── -->
+  <div style="margin-top:1rem">
+    <button class="dash-new-btn" id="diaryToggle" onclick="toggleDiary()">
+      <span id="diaryToggleIcon">📓</span> DAGBOK
+    </button>
+    <div id="diaryForm" style="display:none;margin-top:.75rem">
+      <div class="diary-card">
+        <div class="diary-date-hdr" id="diaryDateHdr"></div>
+
+        <div class="diary-field">
+          <label class="diary-label">Tankar for dagen</label>
+          <textarea id="dThoughts" rows="3" placeholder="Korleis er du i dag? Kva tenkjer du på?"></textarea>
+        </div>
+
+        <div class="diary-field">
+          <label class="diary-label">Korleis har dagen vore? <span id="dayRatingVal" class="diary-rating-val">–</span></label>
+          <div class="diary-rating-row" id="diaryRatingRow"></div>
+        </div>
+
+        <div class="diary-grid">
+          <div class="diary-field">
+            <label class="diary-label">😴 Timar søvn</label>
+            <input type="number" id="dSleep" placeholder="7.5" inputmode="decimal" step="0.5">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">📱 Timar på telefon</label>
+            <input type="number" id="dPhone" placeholder="2.0" inputmode="decimal" step="0.5">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">🏃 Timar rørsle</label>
+            <input type="number" id="dActive" placeholder="1.0" inputmode="decimal" step="0.5">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">🏠 Timar husarbeid</label>
+            <input type="number" id="dHouse" placeholder="1.0" inputmode="decimal" step="0.5">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">👨‍👧‍👦 Timar med ungane</label>
+            <input type="number" id="dKids" placeholder="2.0" inputmode="decimal" step="0.5">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">❤️ Timar med Mari</label>
+            <input type="number" id="dMari" placeholder="2.0" inputmode="decimal" step="0.5">
+          </div>
+        </div>
+
+        <div class="diary-grid">
+          <div class="diary-field">
+            <label class="diary-label">📱 Siste telefonbruk</label>
+            <input type="time" id="dLastPhone">
+          </div>
+          <div class="diary-field">
+            <label class="diary-label">🛏️ Klokkeslett i seng</label>
+            <input type="time" id="dBedtime">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveDiaryEntry()" style="margin-top:.5rem">LAGRE DAGBOK</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -629,6 +741,7 @@ const DEF_TEMPLATES_CARDIO = [
 // STATE
 // ════════════════════════════════════════════════════════
 let sessions      = lsGet('sessions', []);
+let diaryEntries  = lsGet('diaryEntries', []);
 let exLib         = lsGet('exLib', [...DEF_EXERCISES]);
 let cardioLib     = lsGet('cardioLib', [...DEF_CARDIO]);
 let wuLib         = lsGet('wuLib', [...DEF_WARMUP]);
@@ -669,7 +782,7 @@ function toast(msg, red){
 function saveAll(){
   lsSet('sessions',sessions); lsSet('exLib',exLib); lsSet('cardioLib',cardioLib);
   lsSet('wuLib',wuLib); lsSet('strTemplates',strTemplates); lsSet('cardioTemplates',cardioTemplates);
-  lsSet('weekPlans',weekPlans);
+  lsSet('weekPlans',weekPlans); lsSet('diaryEntries',diaryEntries);
 }
 
 function blankSet(prev){ return {id:uid(),kg:prev?prev.kg:'',reps:prev?prev.reps:'',rest:prev?prev.rest:''}; }
@@ -683,10 +796,10 @@ function blankCardio() { return {id:uid(),name:'',type:'interval',intervals:[bla
 function setSyncBtn(state){
   const b=document.getElementById('syncBtn');
   b.className='h-btn';
-  if(state==='syncing'){b.textContent='⟳ HENTAR...';b.classList.add('syncing');}
+  if(state==='syncing'){b.textContent='HENTAR...';b.classList.add('syncing');}
   else if(state==='ok'){b.textContent='✓ LAGRA';b.classList.add('ok');setTimeout(()=>setSyncBtn('idle'),3000);}
   else if(state==='err'){b.textContent='✗ FEIL';b.classList.add('err');setTimeout(()=>setSyncBtn('idle'),4000);}
-  else{b.textContent='☁ SYNK';}
+  else{b.textContent='SYNK';}
 }
 
 async function pushToServer(){
@@ -806,23 +919,42 @@ function gotoView(name){
 // ════════════════════════════════════════════════════════
 function setSessionType(type){
   sessionType=type;
-  ['strength','cardio','both'].forEach(t=>{
-    const b=document.getElementById('type'+t.charAt(0).toUpperCase()+t.slice(1));
+  const typeMap = {strength:'Strength',cardio:'Cardio',play:'Play'};
+  ['strength','cardio','play'].forEach(t=>{
+    const id = 'type'+(typeMap[t]);
+    const b=document.getElementById(id);
+    if(!b) return;
     b.className='type-btn';
-    if(t===type) b.classList.add('active-'+type);
+    if(t===type){
+      if(t==='strength') b.classList.add('active-strength');
+      else if(t==='cardio') b.classList.add('active-cardio');
+      else if(t==='play') b.classList.add('active-play');
+    }
   });
-  document.getElementById('strengthSection').style.display = (type==='cardio') ? 'none' : 'block';
-  document.getElementById('cardioSection').style.display   = (type==='strength') ? 'none' : 'block';
+  document.getElementById('strengthSection').style.display = (type==='cardio'||type==='play') ? 'none' : 'block';
+  document.getElementById('cardioSection').style.display   = (type==='strength'||type==='play') ? 'none' : 'block';
+  document.getElementById('playSection').style.display     = (type==='play') ? 'block' : 'none';
 }
 
 // ════════════════════════════════════════════════════════
 // WARMUP SELECT
 // ════════════════════════════════════════════════════════
+function refreshPlaySelect(){
+  const sel = document.getElementById('playActivity');
+  if(!sel) return;
+  const allActivities = [...new Set([...cardioLib,...wuLib])].sort();
+  sel.innerHTML = '<option value="">— Vel aktivitet —</option>' +
+    allActivities.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
+}
+
 function refreshWuSelect(){
   const sel=document.getElementById('wuType');
+  if(!sel) return;
   const cur=sel.value;
+  // Merge wuLib and cardioLib so warmup has same options as cardio
+  const allWu=[...new Set([...wuLib,...cardioLib])].sort();
   sel.innerHTML='<option value="">— Ingen —</option>'+
-    wuLib.map(w=>`<option value="${esc(w)}" ${cur===w?'selected':''}>${esc(w)}</option>`).join('');
+    allWu.map(w=>`<option value="${esc(w)}" ${cur===w?'selected':''}>${esc(w)}</option>`).join('');
 }
 
 function refreshCardioActivity(selId, selected){
@@ -857,6 +989,10 @@ function renderExList(){
       <div class="ex-head">
         <span class="ex-num">${String(ei+1).padStart(2,'0')}</span>
         <select onchange="setExName('${ex.id}',this.value)">${exOptions(ex.name)}</select>
+        <div style="display:flex;gap:.3rem;margin-top:.3rem">
+          <input type="text" id="customEx_${ex.id}" placeholder="Ny øving..." style="flex:1;font-size:.78rem;padding:.3rem .5rem;border:2px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit" onkeydown="if(event.key==='Enter')addCustomEx('${ex.id}')">
+          <button onclick="addCustomEx('${ex.id}')" style="font-size:.65rem;padding:.3rem .55rem;background:none;border:2px solid var(--accent);color:var(--accent);border-radius:4px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:600">+</button>
+        </div>
         ${logExs.length>1?`<button class="set-del" onclick="removeEx('${ex.id}')">×</button>`:''}
       </div>
       <div class="ex-body">
@@ -908,6 +1044,10 @@ function renderCardioList(){
       <div class="cardio-head">
         <span class="cardio-num">${String(ci+1).padStart(2,'0')}</span>
         <select onchange="setCardioName('${c.id}',this.value)">${cardioActivityOptions(c.name)}</select>
+        <div style="display:flex;gap:.3rem;margin-top:.3rem">
+          <input type="text" id="customCardio_${c.id}" placeholder="Ny aktivitet..." style="flex:1;font-size:.78rem;padding:.3rem .5rem;border:2px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit" onkeydown="if(event.key==='Enter')addCustomCardio('${c.id}')">
+          <button onclick="addCustomCardio('${c.id}')" style="font-size:.65rem;padding:.3rem .55rem;background:none;border:2px solid var(--orange);color:var(--orange);border-radius:4px;cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:600">+</button>
+        </div>
         ${logCardios.length>1?`<button class="set-del" onclick="removeCardio('${c.id}')" style="color:#f0a060">×</button>`:''}
       </div>
       <div class="cardio-body">
@@ -971,11 +1111,17 @@ function renderCardioList(){
 // ════════════════════════════════════════════════════════
 function saveSession(){
   const date = document.getElementById('sessionDate').value || today();
-  const validExs = sessionType!=='cardio' ? logExs.filter(e=>e.name&&e.sets.some(s=>s.reps)) : [];
-  const validCardios = sessionType!=='strength' ? logCardios.filter(c=>c.name) : [];
+  const validExs = (sessionType==='strength') ? logExs.filter(e=>e.name&&e.sets.some(s=>s.reps)) : [];
+  const validCardios = (sessionType==='cardio') ? logCardios.filter(c=>c.name) : [];
+  const playData = (sessionType==='play') ? {
+    activity: getPlayActivity(),
+    duration: document.getElementById('playDuration').value,
+    intensity: document.getElementById('playIntensity').value,
+    desc: document.getElementById('playDesc').value
+  } : null;
 
-  if(!validExs.length && !validCardios.length){
-    toast('Legg til minst éi øving!',true); return;
+  if(!validExs.length && !validCardios.length && !(playData&&playData.activity)){
+    toast('Legg til minst éi øving eller aktivitet!',true); return;
   }
 
   const wu={type:document.getElementById('wuType').value,min:document.getElementById('wuMin').value,km:document.getElementById('wuKm').value};
@@ -1008,7 +1154,7 @@ function resetLogForm(){
   logExs=[blankEx()]; logCardios=[blankCardio()];
   setSessionType('strength');
   renderExList(); renderCardioList();
-  ['wuType','wuMin','wuKm','sessionNote'].forEach(id=>document.getElementById(id).value='');
+  ['wuType','wuMin','wuKm','sessionNote','playActivity','playActivityCustom','playDuration','playDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('sessionDate').value=today();
   document.getElementById('saveBtn').textContent='LAGRE ØKT';
   document.getElementById('cancelEditBtn').style.display='none';
@@ -1035,9 +1181,17 @@ function loadSessionForEdit(id){
     document.getElementById('wuMin').value=s.warmup.min||'';
     document.getElementById('wuKm').value=s.warmup.km||'';
   }
-  setSessionType(s.sessionType||'strength');
+  setSessionType(['strength','cardio','play'].includes(s.sessionType)?s.sessionType:'strength');
   logExs = s.exercises && s.exercises.length ? s.exercises.map(e=>({...e,id:e.id||uid(),sets:e.sets.map(st=>({...st,id:st.id||uid()}))})) : [blankEx()];
   logCardios = s.cardios && s.cardios.length ? s.cardios.map(c=>({...c,id:c.id||uid(),intervals:(c.intervals||[]).map(i=>({...i,id:i.id||uid()}))})) : [blankCardio()];
+  if(s.play){
+    setTimeout(()=>{
+      const pa=document.getElementById('playActivity'); if(pa)pa.value=s.play.activity||'';
+      const pd=document.getElementById('playDuration'); if(pd)pd.value=s.play.duration||'';
+      const pi=document.getElementById('playIntensity'); if(pi)pi.value=s.play.intensity||'Moderat';
+      const pde=document.getElementById('playDesc'); if(pde)pde.value=s.play.desc||'';
+    },100);
+  }
   renderExList(); renderCardioList();
   document.getElementById('saveBtn').textContent='LAGRE ENDRINGAR';
   document.getElementById('cancelEditBtn').style.display='block';
@@ -1067,6 +1221,21 @@ function makePDF(s){
     doc.setFontSize(9); doc.setTextColor(12,36,25);
     let wt=s.warmup.type+(s.warmup.min?' · '+s.warmup.min+' min':'')+(s.warmup.km?' · '+s.warmup.km+' km':'');
     doc.text(wt,M,y); y+=9;
+  }
+
+  // Play
+  if(s.play&&s.play.activity){
+    if(y>258){doc.addPage();y=M;}
+    doc.setFillColor(245,235,255); doc.rect(M-2,y-4,W-M*2+4,8,'F');
+    doc.setFontSize(8); doc.setTextColor(123,63,160); doc.setFont('helvetica','bold');
+    doc.text(('🤸 '+s.play.activity+' — LEIK').toUpperCase(),M,y); y+=7;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(12,36,25);
+    let playLine = '';
+    if(s.play.duration) playLine += s.play.duration+' min';
+    if(s.play.intensity) playLine += (playLine?' · ':'')+s.play.intensity;
+    if(s.play.desc) playLine += (playLine?' · ':'')+s.play.desc;
+    if(playLine) { doc.text(playLine,M,y); y+=6; }
+    y+=3;
   }
 
   // Cardio
@@ -1264,7 +1433,7 @@ function renderHistory(){
         <div class="hist-sessions-list">
           ${group.map(s=>{
             const vol=(s.exercises||[]).reduce((a,e)=>a+e.sets.reduce((b,st)=>b+(parseFloat(st.kg)||0)*(parseInt(st.reps)||0),0),0);
-            const typeIcon={strength:'💪',cardio:'🏃',both:'⚡'}[s.sessionType]||'💪';
+            const typeIcon={strength:'💪',cardio:'🏃',play:'🤸'}[s.sessionType]||'💪';
             const names=[...(s.exercises||[]).filter(e=>e.name).map(e=>e.name),...(s.cardios||[]).filter(c=>c.name).map(c=>c.name)].join(', ');
             return `<div class="hist-mini-session" onclick="expandSession('${s.id}')">
               <div class="hist-mini-left">
@@ -1282,7 +1451,14 @@ function renderHistory(){
             </div>
             <div class="hist-body" id="hb-${s.id}" style="display:none;border:1.5px solid var(--border);border-radius:5px;margin-bottom:.45rem;padding:.75rem .85rem;background:var(--surface)">
               ${s.warmup?.type?`<div class="hist-warm">🏃 ${esc(s.warmup.type)}${s.warmup.min?' · '+s.warmup.min+' min':''}${s.warmup.km?' · '+s.warmup.km+' km':''}</div>`:''}
-              ${(s.cardios||[]).filter(c=>c.name).map(c=>`
+              ${s.play&&s.play.activity?`
+          <div class="hist-cardio-ex" style="color:#7b3fa0">🤸 ${esc(s.play.activity).toUpperCase()} — LEIK</div>
+          <div class="hist-set">
+            ${s.play.duration?`<span>${s.play.duration} min</span>`:''}
+            ${s.play.intensity?`<span>${s.play.intensity}</span>`:''}
+            ${s.play.desc?`<span>${esc(s.play.desc)}</span>`:''}
+          </div>`:''}
+        ${(s.cardios||[]).filter(c=>c.name).map(c=>`
                 <div class="hist-cardio-ex">${esc(c.name).toUpperCase()} — ${c.type==='interval'?'INTERVALL':'STEADY STATE'}</div>
                 ${c.type==='interval'
                   ? c.intervals.map((iv,j)=>`<div class="hist-set"><span>Int ${j+1}</span>${iv.min?`<span>${iv.min}</span>`:''} ${iv.meter?`<span>${iv.meter} m</span>`:''} ${iv.pace?`<span>${iv.pace} min/km</span>`:''} ${iv.rest?`<span>Pause: ${iv.rest}</span>`:''}</div>`).join('')
@@ -1658,7 +1834,6 @@ function renderPlan(){
   const bannerEl = document.getElementById('currentWeekBanner');
   const curPlan = weekPlans.find(p=>p.week===curWeek && p.year===curYear);
   if(curPlan){
-    const activeDays = (curPlan.days||[]).filter(d=>d.templateId!=='rest');
     bannerEl.innerHTML = `
       <div class="week-banner">
         <div class="week-banner-label">DENNE VEKA – VEK ${curWeek}</div>
@@ -1680,23 +1855,26 @@ function renderPlan(){
     bannerEl.innerHTML = '';
   }
 
-  // Plan list
   const el = document.getElementById('planList');
   if(!weekPlans.length){ el.innerHTML='<div class="empty">INGEN PLANAR ENDÅ – TRYKK + NY VEKE</div>'; return; }
 
-  const sorted = [...weekPlans].sort((a,b)=> a.year!==b.year ? a.year-b.year : a.week-b.week);
-  el.innerHTML = sorted.map(p=>{
+  const sorted = [...weekPlans].sort((a,b)=> a.year!==b.year ? b.year-a.year : b.week-a.week);
+
+  // Split into current/future and past
+  const upcoming = sorted.filter(p=> (p.year > curYear) || (p.year===curYear && p.week >= curWeek));
+  const past     = sorted.filter(p=> (p.year < curYear) || (p.year===curYear && p.week < curWeek));
+
+  function planCardHtml(p){
     const isCurrent = p.week===curWeek && p.year===curYear;
-    const isPast = (p.year < curYear) || (p.year===curYear && p.week < curWeek);
     return `
     <div class="plan-card ${isCurrent?'current-week':''}">
       <div class="plan-head" onclick="togglePlanCard('${p.id}')">
         <div>
           <div class="plan-week-label">
-            ${isCurrent?'✓ DENNE VEKA · ':isPast?'':''}VEK ${p.week}, ${p.year}
+            ${isCurrent?'✓ DENNE VEKA · ':''}VEK ${p.week}, ${p.year}
             <span style="font-weight:400;margin-left:.4rem">${getWeekDateRange(p.week,p.year)}</span>
           </div>
-          <div class="plan-week-name">${(p.days||[]).filter(d=>d.templateId!=='rest').length} treningsdagar
+          <div class="plan-week-name">${[...new Set((p.days||[]).filter(d=>d.templateId!=='rest').map(d=>d.day))].length} treningsdagar
             ${p.note?`<span style="font-size:.72rem;color:var(--muted);font-weight:400"> · ${esc(p.note)}</span>`:''}
           </div>
         </div>
@@ -1710,7 +1888,6 @@ function renderPlan(){
       </div>
       <div class="plan-body" id="pb-${p.id}">
         ${(()=>{
-          // Group by day
           const grouped={};
           DAYS.forEach(d=>grouped[d]=[]);
           (p.days||[]).forEach(d=>{ if(!grouped[d.day])grouped[d.day]=[]; grouped[d.day].push(d); });
@@ -1729,8 +1906,39 @@ function renderPlan(){
         ${p.note?`<div class="plan-note">${esc(p.note)}</div>`:''}
       </div>
     </div>`;
-  }).join('');
+  }
+
+  // Render upcoming plans
+  let html = upcoming.length
+    ? upcoming.map(planCardHtml).join('')
+    : '<div class="empty" style="padding:1.5rem 0">Ingen kommande planar</div>';
+
+  // Render past plans collapsed section
+  if(past.length){
+    html += `
+    <div style="margin-top:1rem">
+      <button class="dash-new-btn" id="pastPlansToggle" onclick="togglePastPlans()">
+        <span id="pastPlansIcon">▶</span> TIDLEGARE TRENINGSPLANAR (${past.length})
+      </button>
+      <div id="pastPlansList" style="display:none;margin-top:.6rem">
+        ${past.map(planCardHtml).join('')}
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML = html;
 }
+
+function togglePastPlans(){
+  const list = document.getElementById('pastPlansList');
+  const icon = document.getElementById('pastPlansIcon');
+  const btn  = document.getElementById('pastPlansToggle');
+  const open = list.style.display === 'none';
+  list.style.display = open ? 'block' : 'none';
+  icon.textContent   = open ? '▼' : '▶';
+  btn.classList.toggle('open', open);
+}
+
 
 function togglePlanCard(id){
   const b=document.getElementById('pb-'+id), t=document.getElementById('ptog-'+id);
@@ -1954,7 +2162,7 @@ function toggleNewSession(){
   const isOpen = form.style.display !== 'none';
   form.style.display = isOpen ? 'none' : 'block';
   btn.classList.toggle('open', !isOpen);
-  icon.textContent = isOpen ? '＋' : '－';
+  icon.textContent = isOpen ? '＋' : '×';
   if(!isOpen) window.scrollTo({top: document.getElementById('newSessionToggle').offsetTop - 80, behavior:'smooth'});
 }
 
@@ -1985,12 +2193,13 @@ function handleStravaConnect(){
     return;
   }
   // Start OAuth flow
+  const redirectUri = API + '?action=strava_callback';
   const authUrl = 'https://www.strava.com/oauth/authorize' +
     '?client_id=' + STRAVA_CLIENT_ID +
-    '&redirect_uri=' + encodeURIComponent(API + '?action=strava_callback') +
+    '&redirect_uri=' + encodeURIComponent(redirectUri) +
     '&response_type=code' +
     '&approval_prompt=force' +
-    '&scope=activity:write,activity:read_all';
+    '&scope=activity:write,read';
   window.open(authUrl, '_blank', 'width=600,height=700');
   // Poll for connection
   let attempts = 0;
@@ -2020,7 +2229,7 @@ function updateStravaBtn(){
   const btn = document.getElementById('stravaBtn');
   if(!btn) return;
   const connected = lsGet('stravaConnected', false);
-  btn.textContent = connected ? '🚴 STRAVA ✓' : '🚴 STRAVA';
+  btn.textContent = connected ? 'STRAVA ✓' : 'STRAVA';
   btn.classList.toggle('strava-connected', connected);
 }
 
@@ -2048,12 +2257,156 @@ async function pushSessionToStrava(session){
   }
 }
 
+// ════════════════════════════════════════════════════════
+// DAGBOK
+// ════════════════════════════════════════════════════════
+let currentDayRating = null;
+
+function toggleDiary(){
+  const form = document.getElementById('diaryForm');
+  const btn  = document.getElementById('diaryToggle');
+  const icon = document.getElementById('diaryToggleIcon');
+  const isOpen = form.style.display !== 'none';
+  form.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  icon.textContent = isOpen ? '📓' : '📓';
+  if(!isOpen) initDiaryForm();
+}
+
+function initDiaryForm(){
+  // Set date header
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const hdr = document.getElementById('diaryDateHdr');
+  if(hdr) hdr.textContent = dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
+
+  // Render rating buttons
+  const row = document.getElementById('diaryRatingRow');
+  if(row){
+    row.innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n=>
+      `<button class="diary-rating-btn ${currentDayRating===n?'selected':''}" id="rating-${n}" onclick="setDayRating(${n})">${n}</button>`
+    ).join('');
+  }
+
+  // Load existing entry for today if any
+  const todayEntry = diaryEntries.find(e=>e.date===today());
+  if(todayEntry){
+    document.getElementById('dThoughts').value  = todayEntry.thoughts  || '';
+    document.getElementById('dSleep').value     = todayEntry.sleep     || '';
+    document.getElementById('dPhone').value     = todayEntry.phone     || '';
+    document.getElementById('dActive').value    = todayEntry.active    || '';
+    document.getElementById('dHouse').value     = todayEntry.house     || '';
+    document.getElementById('dKids').value      = todayEntry.kids      || '';
+    document.getElementById('dMari').value      = todayEntry.mari      || '';
+    document.getElementById('dLastPhone').value = todayEntry.lastPhone || '';
+    document.getElementById('dBedtime').value   = todayEntry.bedtime   || '';
+    if(todayEntry.rating){
+      setDayRating(todayEntry.rating);
+    }
+  } else {
+    // Reset form
+    ['dThoughts','dSleep','dPhone','dActive','dHouse','dKids','dMari','dLastPhone','dBedtime']
+      .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    currentDayRating = null;
+  }
+}
+
+function setDayRating(n){
+  currentDayRating = n;
+  document.querySelectorAll('.diary-rating-btn').forEach(btn=>{
+    btn.classList.toggle('selected', parseInt(btn.textContent)===n);
+  });
+  const val = document.getElementById('dayRatingVal');
+  if(val) val.textContent = n + '/10';
+}
+
+function saveDiaryEntry(){
+  const entry = {
+    date:      today(),
+    thoughts:  document.getElementById('dThoughts').value,
+    rating:    currentDayRating,
+    sleep:     document.getElementById('dSleep').value,
+    phone:     document.getElementById('dPhone').value,
+    active:    document.getElementById('dActive').value,
+    house:     document.getElementById('dHouse').value,
+    kids:      document.getElementById('dKids').value,
+    mari:      document.getElementById('dMari').value,
+    lastPhone: document.getElementById('dLastPhone').value,
+    bedtime:   document.getElementById('dBedtime').value,
+    savedAt:   new Date().toISOString()
+  };
+
+  // Replace existing entry for today or add new
+  const idx = diaryEntries.findIndex(e=>e.date===today());
+  if(idx >= 0) diaryEntries[idx] = entry;
+  else diaryEntries.unshift(entry);
+
+  saveAll();
+  pushToServer();
+  toast('Dagbok lagra! 📓');
+
+  // Close diary
+  document.getElementById('diaryForm').style.display='none';
+  document.getElementById('diaryToggle').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════════
+// CUSTOM ACTIVITY / EXERCISE INPUT
+// ════════════════════════════════════════════════════════
+
+function addCustomEx(exId){
+  const inp = document.getElementById('customEx_'+exId);
+  const val = inp ? inp.value.trim() : '';
+  if(!val) return;
+  if(!exLib.includes(val)){ exLib.push(val); saveAll(); pushToServer(); }
+  setExName(exId, val);
+  renderExList();
+  toast('"'+val+'" lagt til i styrkeøvingar!');
+}
+
+function addCustomCardio(cardioId){
+  const inp = document.getElementById('customCardio_'+cardioId);
+  const val = inp ? inp.value.trim() : '';
+  if(!val) return;
+  if(!cardioLib.includes(val)) cardioLib.push(val);
+  if(!wuLib.includes(val)) wuLib.push(val);
+  saveAll(); pushToServer();
+  setCardioName(cardioId, val);
+  refreshWuSelect(); refreshPlaySelect();
+  renderCardioList();
+  toast('"'+val+'" lagt til i kondisjon!');
+}
+
+function addPlayActivity(){
+  const inp = document.getElementById('playActivityCustom');
+  const val = inp ? inp.value.trim() : '';
+  if(!val){ toast('Skriv inn ein aktivitet fyrst!', true); return; }
+  if(!cardioLib.includes(val)) cardioLib.push(val);
+  if(!wuLib.includes(val)) wuLib.push(val);
+  saveAll(); pushToServer();
+  refreshPlaySelect();
+  refreshWuSelect();
+  // Select the new activity in dropdown
+  setTimeout(()=>{
+    const sel = document.getElementById('playActivity');
+    if(sel) sel.value = val;
+    if(inp) inp.value = '';
+  }, 100);
+  toast('"'+val+'" lagt til!');
+}
+
+function getPlayActivity(){
+  const sel = document.getElementById('playActivity');
+  return sel ? sel.value : '';
+}
+
 function init(){
   document.getElementById('sessionDate').value=today();
   document.getElementById('hCount').textContent=sessions.length+' ØKTER';
   logExs=[blankEx()]; logCardios=[blankCardio()];
   renderExList(); renderCardioList();
   refreshWuSelect();
+  refreshPlaySelect();
   renderDashboard();
   updateStravaBtn();
 }
@@ -2074,6 +2427,7 @@ async function startupSync(){
       if(data.cardioTemplates)   { cardioTemplates=data.cardioTemplates;lsSet('cardioTemplates',cardioTemplates); }
       document.getElementById('hCount').textContent=sessions.length+' ØKTER';
       refreshWuSelect();
+      refreshPlaySelect();
       renderDashboard();
       setSyncBtn('ok');
       hideLoadingOverlay('✓ Data lasta inn – '+sessions.length+' økter');
