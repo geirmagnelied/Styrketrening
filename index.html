@@ -199,6 +199,8 @@ input[type=date]{color:var(--text)}
 /* Edit overlay badge */
 .edit-badge{display:inline-block;background:var(--orange);color:#fff;font-size:.62rem;letter-spacing:.1em;padding:.15rem .5rem;border-radius:3px;margin-left:.5rem;vertical-align:middle}
 
+.strava-connected{color:#fc4c02;border-color:#fc4c02}
+.strava-toast{background:#fc4c02}
 .empty{text-align:center;color:var(--muted);padding:3.5rem 0;font-size:.85rem;letter-spacing:.15em}
 
 /* ── Dashboard ── */
@@ -292,6 +294,7 @@ input[type=date]{color:var(--text)}
     <div class="h-btns">
       <button class="h-btn" id="syncBtn" onclick="syncNow()">☁ SYNK</button>
       <button class="h-btn" onclick="forcePushToServer()" title="Slå saman data frå alle einingar og lagre">⇅ FLETT</button>
+      <button class="h-btn" id="stravaBtn" onclick="handleStravaConnect()" title="Koble til Strava">🚴 STRAVA</button>
       <button class="h-btn" onclick="exportBackup()">⬇ BACKUP</button>
     </div>
   </div>
@@ -1965,6 +1968,86 @@ function openNewSession(){
   setTimeout(()=>window.scrollTo({top: document.getElementById('newSessionForm').offsetTop - 80, behavior:'smooth'}), 100);
 }
 
+// ════════════════════════════════════════════════════════
+// STRAVA INTEGRASJON
+// ════════════════════════════════════════════════════════
+const STRAVA_CLIENT_ID = '244970';
+const STRAVA_REDIRECT  = 'https://geirmagnelied.github.io/Styrketrening';
+
+function handleStravaConnect(){
+  const connected = lsGet('stravaConnected', false);
+  if(connected){
+    if(confirm('Du er allereie kopla til Strava. Vil du koble frå?')){
+      lsSet('stravaConnected', false);
+      updateStravaBtn();
+      toast('Strava frakopla');
+    }
+    return;
+  }
+  // Start OAuth flow
+  const authUrl = 'https://www.strava.com/oauth/authorize' +
+    '?client_id=' + STRAVA_CLIENT_ID +
+    '&redirect_uri=' + encodeURIComponent(API + '?action=strava_callback') +
+    '&response_type=code' +
+    '&approval_prompt=force' +
+    '&scope=activity:write,activity:read_all';
+  window.open(authUrl, '_blank', 'width=600,height=700');
+  // Poll for connection
+  let attempts = 0;
+  const poll = setInterval(()=>{
+    attempts++;
+    checkStravaConnection().then(ok=>{
+      if(ok){
+        clearInterval(poll);
+        lsSet('stravaConnected', true);
+        updateStravaBtn();
+        toast('✓ Strava kopla til!');
+      }
+    });
+    if(attempts > 20) clearInterval(poll);
+  }, 3000);
+}
+
+async function checkStravaConnection(){
+  try {
+    const res = await fetch(API + '?action=check_strava&t=' + Date.now());
+    const data = JSON.parse(await res.text());
+    return data && data.connected;
+  } catch { return false; }
+}
+
+function updateStravaBtn(){
+  const btn = document.getElementById('stravaBtn');
+  if(!btn) return;
+  const connected = lsGet('stravaConnected', false);
+  btn.textContent = connected ? '🚴 STRAVA ✓' : '🚴 STRAVA';
+  btn.classList.toggle('strava-connected', connected);
+}
+
+async function pushSessionToStrava(session){
+  if(!lsGet('stravaConnected', false)) return;
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'strava_push', session })
+    });
+    const data = JSON.parse(await res.text());
+    if(data.success){
+      toast('✓ Lagt til på Strava!');
+      if(data.strava_url){
+        setTimeout(()=>{
+          if(confirm('Økt lagra på Strava! Vil du sjå han?')){
+            window.open(data.strava_url, '_blank');
+          }
+        }, 500);
+      }
+    }
+  } catch(e){
+    console.error('Strava push failed:', e);
+  }
+}
+
 function init(){
   document.getElementById('sessionDate').value=today();
   document.getElementById('hCount').textContent=sessions.length+' ØKTER';
@@ -1972,6 +2055,7 @@ function init(){
   renderExList(); renderCardioList();
   refreshWuSelect();
   renderDashboard();
+  updateStravaBtn();
 }
 
 // ── Robust startup sync ──────────────────────────────────
