@@ -456,38 +456,48 @@ input[type=date]{color:var(--text)}
         <div class="diary-grid">
           <div class="diary-field">
             <label class="diary-label">😴 Timar søvn</label>
-            <input type="number" id="dSleep" placeholder="7.5" inputmode="decimal" step="0.5">
+            <input type="text" id="dSleep" placeholder="7,5" inputmode="decimal">
           </div>
           <div class="diary-field">
             <label class="diary-label">📱 Timar på telefon</label>
-            <input type="number" id="dPhone" placeholder="2.0" inputmode="decimal" step="0.5">
+            <input type="text" id="dPhone" placeholder="2,0" inputmode="decimal">
           </div>
           <div class="diary-field">
             <label class="diary-label">🏃 Timar rørsle</label>
-            <input type="number" id="dActive" placeholder="1.0" inputmode="decimal" step="0.5">
+            <input type="text" id="dActive" placeholder="1,0" inputmode="decimal">
           </div>
           <div class="diary-field">
             <label class="diary-label">🏠 Timar husarbeid</label>
-            <input type="number" id="dHouse" placeholder="1.0" inputmode="decimal" step="0.5">
+            <input type="text" id="dHouse" placeholder="1,0" inputmode="decimal">
           </div>
           <div class="diary-field">
             <label class="diary-label">👨‍👧‍👦 Timar med ungane</label>
-            <input type="number" id="dKids" placeholder="2.0" inputmode="decimal" step="0.5">
+            <input type="text" id="dKids" placeholder="2,0" inputmode="decimal">
           </div>
           <div class="diary-field">
             <label class="diary-label">❤️ Timar med Mari</label>
-            <input type="number" id="dMari" placeholder="2.0" inputmode="decimal" step="0.5">
+            <input type="text" id="dMari" placeholder="2,0" inputmode="decimal">
           </div>
+        </div>
+
+        <div class="diary-field" style="margin-top:.5rem">
+          <label class="diary-label">😴 Søvnkvalitet <span id="sleepQualVal" class="diary-rating-val">–</span></label>
+          <div class="diary-rating-row" id="sleepQualRow"></div>
+        </div>
+
+        <div class="diary-field">
+          <label class="diary-label">🥗 Kor sunt har eg ete? <span id="foodQualVal" class="diary-rating-val">–</span></label>
+          <div class="diary-rating-row" id="foodQualRow"></div>
         </div>
 
         <div class="diary-grid">
           <div class="diary-field">
             <label class="diary-label">📱 Siste telefonbruk</label>
-            <input type="time" id="dLastPhone">
+            <input type="text" id="dLastPhone" placeholder="22:30:00">
           </div>
           <div class="diary-field">
             <label class="diary-label">🛏️ Klokkeslett i seng</label>
-            <input type="time" id="dBedtime">
+            <input type="text" id="dBedtime" placeholder="23:00:00">
           </div>
         </div>
 
@@ -2261,6 +2271,8 @@ async function pushSessionToStrava(session){
 // DAGBOK
 // ════════════════════════════════════════════════════════
 let currentDayRating = null;
+let currentSleepQual = null;
+let currentFoodQual  = null;
 
 function toggleDiary(){
   const form = document.getElementById('diaryForm');
@@ -2280,11 +2292,25 @@ function initDiaryForm(){
   const hdr = document.getElementById('diaryDateHdr');
   if(hdr) hdr.textContent = dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
 
-  // Render rating buttons
+  // Render day rating buttons
   const row = document.getElementById('diaryRatingRow');
   if(row){
     row.innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n=>
       `<button class="diary-rating-btn ${currentDayRating===n?'selected':''}" id="rating-${n}" onclick="setDayRating(${n})">${n}</button>`
+    ).join('');
+  }
+  // Render sleep quality buttons
+  const sleepRow = document.getElementById('sleepQualRow');
+  if(sleepRow){
+    sleepRow.innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n=>
+      `<button class="diary-rating-btn ${currentSleepQual===n?'selected':''}" id="sleepq-${n}" onclick="setSleepQual(${n})">${n}</button>`
+    ).join('');
+  }
+  // Render food quality buttons
+  const foodRow = document.getElementById('foodQualRow');
+  if(foodRow){
+    foodRow.innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n=>
+      `<button class="diary-rating-btn ${currentFoodQual===n?'selected':''}" id="foodq-${n}" onclick="setFoodQual(${n})">${n}</button>`
     ).join('');
   }
 
@@ -2300,23 +2326,42 @@ function initDiaryForm(){
     document.getElementById('dMari').value      = todayEntry.mari      || '';
     document.getElementById('dLastPhone').value = todayEntry.lastPhone || '';
     document.getElementById('dBedtime').value   = todayEntry.bedtime   || '';
-    if(todayEntry.rating){
-      setDayRating(todayEntry.rating);
-    }
+    if(todayEntry.rating)    setDayRating(todayEntry.rating);
+    if(todayEntry.sleepQual) setSleepQual(todayEntry.sleepQual);
+    if(todayEntry.foodQual)  setFoodQual(todayEntry.foodQual);
   } else {
-    // Reset form
     ['dThoughts','dSleep','dPhone','dActive','dHouse','dKids','dMari','dLastPhone','dBedtime']
       .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
     currentDayRating = null;
+    currentSleepQual = null;
+    currentFoodQual  = null;
   }
 }
 
 function setDayRating(n){
   currentDayRating = n;
-  document.querySelectorAll('.diary-rating-btn').forEach(btn=>{
+  document.querySelectorAll('[id^="rating-"]').forEach(btn=>{
     btn.classList.toggle('selected', parseInt(btn.textContent)===n);
   });
   const val = document.getElementById('dayRatingVal');
+  if(val) val.textContent = n + '/10';
+}
+
+function setSleepQual(n){
+  currentSleepQual = n;
+  document.querySelectorAll('[id^="sleepq-"]').forEach(btn=>{
+    btn.classList.toggle('selected', parseInt(btn.textContent)===n);
+  });
+  const val = document.getElementById('sleepQualVal');
+  if(val) val.textContent = n + '/10';
+}
+
+function setFoodQual(n){
+  currentFoodQual = n;
+  document.querySelectorAll('[id^="foodq-"]').forEach(btn=>{
+    btn.classList.toggle('selected', parseInt(btn.textContent)===n);
+  });
+  const val = document.getElementById('foodQualVal');
   if(val) val.textContent = n + '/10';
 }
 
@@ -2325,6 +2370,8 @@ function saveDiaryEntry(){
     date:      today(),
     thoughts:  document.getElementById('dThoughts').value,
     rating:    currentDayRating,
+    sleepQual: currentSleepQual,
+    foodQual:  currentFoodQual,
     sleep:     document.getElementById('dSleep').value,
     phone:     document.getElementById('dPhone').value,
     active:    document.getElementById('dActive').value,
@@ -2425,6 +2472,8 @@ async function startupSync(){
       if(data.wuLib)             { wuLib=data.wuLib;                    lsSet('wuLib',wuLib); }
       if(data.strTemplates)      { strTemplates=data.strTemplates;      lsSet('strTemplates',strTemplates); }
       if(data.cardioTemplates)   { cardioTemplates=data.cardioTemplates;lsSet('cardioTemplates',cardioTemplates); }
+      if(data.weekPlans)         { weekPlans=data.weekPlans;            lsSet('weekPlans',weekPlans); }
+      if(data.diaryEntries)      { diaryEntries=data.diaryEntries;      lsSet('diaryEntries',diaryEntries); }
       document.getElementById('hCount').textContent=sessions.length+' ØKTER';
       refreshWuSelect();
       refreshPlaySelect();
